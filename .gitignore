@@ -1,0 +1,29 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.idea/
+.DS_Store
+/build
+*/build
+build/
+app/build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Keystore & Signing files (VERY IMPORTANT FOR SECURITY)
+*.jks
+*.keystore
+*.key
+*.pepk
+
+# APK & AAB
+*.apk
+*.aab
+*.ap_
+
+# Logs
+*.log
+

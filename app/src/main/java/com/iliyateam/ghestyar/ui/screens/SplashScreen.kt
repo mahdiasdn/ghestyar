@@ -1,0 +1,212 @@
+// ═══ ui/screens/SplashScreen.kt ═══
+package com.iliyateam.ghestyar.ui.screens
+
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.iliyateam.ghestyar.ui.components.bounceClick
+import com.iliyateam.ghestyar.ui.components.shimmerBrush
+import com.iliyateam.ghestyar.ui.theme.GoldVip
+import com.iliyateam.ghestyar.ui.theme.MintSoft
+import com.iliyateam.ghestyar.ui.theme.Moss
+import com.iliyateam.ghestyar.ui.theme.MossLight
+import kotlinx.coroutines.delay
+
+@Composable
+fun SplashScreen(onFinish: () -> Unit) {
+    var logoAppeared by remember { mutableStateOf(false) }
+    var progress by remember { mutableFloatStateOf(0f) }
+
+    val logoScale by animateFloatAsState(
+        targetValue = if (logoAppeared) 1.0f else 0.4f,
+        animationSpec = spring(
+            dampingRatio = 0.55f,
+            stiffness = 320f
+        ),
+        label = "LogoScaleAnim"
+    )
+
+    val logoAlpha by animateFloatAsState(
+        targetValue = if (logoAppeared) 1.0f else 0f,
+        animationSpec = tween(durationMillis = 400),
+        label = "LogoAlphaAnim"
+    )
+
+    // انیمیشن پالس و هاله نوری لوگو
+    val infiniteTransition = rememberInfiniteTransition(label = "SplashGlow")
+    val glowScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "GlowScale"
+    )
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 0.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "GlowAlpha"
+    )
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+        label = "ProgressAnim"
+    )
+
+    LaunchedEffect(Unit) {
+        logoAppeared = true
+        delay(300)
+        progress = 1f
+        delay(2000)
+        onFinish()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        ) {
+            // لوگوی متحرک با فیزیک جهشی
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(160.dp)
+                    .graphicsLayer {
+                        scaleX = logoScale
+                        scaleY = logoScale
+                        alpha = logoAlpha
+                    }
+            ) {
+                // هاله نوری ضربان‌دار
+                Box(
+                    modifier = Modifier
+                        .size(130.dp)
+                        .graphicsLayer {
+                            scaleX = glowScale
+                            scaleY = glowScale
+                            alpha = glowAlpha
+                        }
+                        .clip(CircleShape)
+                        .background(MintSoft)
+                )
+
+                // کادر اصلی لوگو M3 Expressive 28dp
+                Surface(
+                    shape = RoundedCornerShape(28.dp),
+                    color = Moss,
+                    modifier = Modifier
+                        .size(92.dp)
+                        .shimmerBrush(durationMillis = 1600),
+                    shadowElevation = 8.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            "ق",
+                            color = Color.White,
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            // نام برنامه و شعار با ورود نرم
+            Text(
+                "قسط‌یار",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            Text(
+                "دستیار هوشمند اقساط و آرامش مالی",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(36.dp))
+
+            // نوار باریک پیشرفت لودینگ فنری
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.width(200.dp)
+            ) {
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(50)),
+                    color = Moss,
+                    trackColor = MintSoft.copy(alpha = 0.4f)
+                )
+
+                Text(
+                    "در حال بارگذاری اطلاعات...",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // اطلاعات نسخه در پایین صفحه
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 28.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                shadowElevation = 1.dp
+            ) {
+                Text(
+                    "نسخه ۱.۰",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Moss,
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp)
+                )
+            }
+        }
+    }
+}

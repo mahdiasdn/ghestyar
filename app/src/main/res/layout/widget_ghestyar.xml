@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="قسط‌یار • سررسید بعدی"
+            android:textColor="#A7F3D0"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_days_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#33F59E0B"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:text="امروز"
+            android:textColor="#FBBF24"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_installment_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="وام مسکن ملی"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_installment_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="۳٬۵۰۰٬۰۰۰ تومان"
+        android:textColor="#34D399"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#22FFFFFF" />
+
+    <TextView
+        android:id="@+id/widget_monthly_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="تعهد این ماه: ۷٬۰۰۰٬۰۰۰ تومان"
+        android:textColor="#9CA3AF"
+        android:textSize="11sp" />
+
+</LinearLayout>

@@ -1,0 +1,640 @@
+// ═══ ui/screens/OverviewScreen.kt ═══
+package com.iliyateam.ghestyar.ui.screens
+
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iliyateam.ghestyar.FinancialStats
+import com.iliyateam.ghestyar.MainViewModel
+import com.iliyateam.ghestyar.data.ChequeOrDebt
+import com.iliyateam.ghestyar.data.Installment
+import com.iliyateam.ghestyar.data.SavingsGoal
+import com.iliyateam.ghestyar.ui.components.ReceiptShareHelper
+import com.iliyateam.ghestyar.ui.components.StaggeredItemEntrance
+import com.iliyateam.ghestyar.ui.components.bounceClick
+import com.iliyateam.ghestyar.ui.components.pulseGlow
+import com.iliyateam.ghestyar.ui.theme.*
+import com.iliyateam.ghestyar.util.*
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+
+@Composable
+fun OverviewScreen(
+    vm: MainViewModel,
+    isPremium: Boolean,
+    onOpenCalculator: () -> Unit,
+    onAddInstallment: () -> Unit,
+    onOpenCashflow: () -> Unit,
+    onOpenGoalsCheques: () -> Unit,
+    onDetailInstallment: (Installment) -> Unit
+) {
+    val activeInstallments by vm.active.collectAsStateWithLifecycle()
+    val stats by vm.stats.collectAsStateWithLifecycle()
+    val cashflow by vm.cashflowSummary.collectAsStateWithLifecycle()
+    val pendingCheques by vm.pendingChequesAndDebts.collectAsStateWithLifecycle()
+    val goals by vm.savingsGoals.collectAsStateWithLifecycle()
+    val isPrivacyMode by vm.isPrivacyMode.collectAsStateWithLifecycle()
+
+    var calendarMonth by remember { mutableStateOf(JalaliDate.today()) }
+    var selectedDay by remember { mutableStateOf(JalaliDate.today()) }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentPadding = PaddingValues(bottom = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // ۱. نوار هدر بالا با statusBarsPadding
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 18.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = Moss,
+                        modifier = Modifier.size(38.dp),
+                        shadowElevation = 2.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Rounded.Dashboard, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text("داشبورد و تقویم مالی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        Text(LocalDate.now().formatJalaliWithWeekday(), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+
+                // دکمه ماشین حساب سریع وام
+                Button(
+                    onClick = onOpenCalculator,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.bounceClick(minScale = 0.94f)
+                ) {
+                    Icon(Icons.Rounded.Calculate, null, tint = Moss, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("ماشین‌حساب وام", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
+
+        // ۲. کارت‌های خلاصه Bento
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    OverviewStatCard(
+                        modifier = Modifier.weight(1f),
+                        title = "تعهد اقساط این ماه",
+                        value = if (isPrivacyMode) "••••••" else "${stats.monthlyCommitment.money()} ت",
+                        icon = Icons.AutoMirrored.Rounded.ReceiptLong,
+                        tint = Moss,
+                        subText = "${stats.activeCount.faDigits()} قسط فعال"
+                    )
+
+                    OverviewStatCard(
+                        modifier = Modifier.weight(1f),
+                        title = "تراز دخل‌وخرج این ماه",
+                        value = if (isPrivacyMode) "••••••" else "${cashflow.netBalance.money()} ت",
+                        icon = Icons.Rounded.AccountBalanceWallet,
+                        tint = if (cashflow.netBalance >= 0) Moss else Coral,
+                        subText = if (cashflow.netBalance >= 0) "تراز مثبت ✨" else "تراز منفی ⚠️"
+                    )
+                }
+            }
+        }
+
+        // ۴. تقویم ماهانه هوشمند شمسی با رنگ‌بندی کاملاً تفکیک‌شده
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // هدر ماه تقویم با کلیدهای قبلی / بعدی
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { calendarMonth = calendarMonth.minusMonths(1) },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(Icons.Rounded.ChevronRight, "ماه قبل", tint = MaterialTheme.colorScheme.onSurface)
+                        }
+
+                        Text(
+                            "${Jalali.months[calendarMonth.jm - 1]} ${calendarMonth.jy.faDigits()}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        IconButton(
+                            onClick = { calendarMonth = calendarMonth.plusMonths(1) },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(Icons.Rounded.ChevronLeft, "ماه بعد", tint = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
+
+                    // سربرگ روزهای هفته
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+                        listOf("ش", "ی", "د", "س", "چ", "پ", "ج").forEach { wd ->
+                            Text(
+                                wd,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (wd == "ج") Coral else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.width(36.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+
+                    // گرید روزهای ماه
+                    JalaliMonthCalendarGrid(
+                        year = calendarMonth.jy,
+                        month = calendarMonth.jm,
+                        selectedDay = selectedDay,
+                        activeInstallments = activeInstallments,
+                        pendingCheques = pendingCheques,
+                        goals = goals,
+                        onDayClick = { selectedDay = it }
+                    )
+
+                    // راهنمای شفاف نشانگرهای رنگی
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        DotLegend(color = Moss, label = "اقساط (سبز)")
+                        DotLegend(color = ChequeBlue, label = "چک / طلب (آبی)")
+                        DotLegend(color = GoldVip, label = "قلک هدف (طلایی)")
+                    }
+                }
+            }
+        }
+
+        // ۵. بخش رویدادهای روز انتخابی تقویم
+        item {
+            val selectedLocalDate = selectedDay.toLocalDate()
+            val selectedEpochDay = selectedLocalDate.toEpochDay()
+
+            val dayInstallments = activeInstallments.filter { it.dueEpochDay == selectedEpochDay }
+            val dayCheques = pendingCheques.filter { it.dueEpochDay == selectedEpochDay }
+            val dayGoals = goals.filter { it.targetEpochDay == selectedEpochDay }
+            val hasEvents = dayInstallments.isNotEmpty() || dayCheques.isNotEmpty() || dayGoals.isNotEmpty()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "سررسیدهای ${selectedDay.format()}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    if (hasEvents) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Moss.copy(alpha = 0.14f)
+                        ) {
+                            Text(
+                                "${(dayInstallments.size + dayCheques.size + dayGoals.size).faDigits()} مورد",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Moss,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (!hasEvents) {
+                    Card(
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.4f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text("✨", fontSize = 22.sp)
+                            Column {
+                                Text("هیچ سررسیدی در این تاریخ ثبت نشده است.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                                Text("برای این روز پرداختی یا موعد چکی نداری.", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                } else {
+                    // لیست اقساط با تم سبز زمردی
+                    dayInstallments.forEachIndexed { idx, item ->
+                        StaggeredItemEntrance(index = idx) {
+                            Card(
+                                onClick = { onDetailInstallment(item) },
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                                border = BorderStroke(1.dp, Moss.copy(alpha = 0.25f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .bounceClick(minScale = 0.96f)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Surface(shape = CircleShape, color = Moss.copy(alpha = 0.14f), modifier = Modifier.size(38.dp)) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(Icons.AutoMirrored.Rounded.ReceiptLong, null, tint = Moss, modifier = Modifier.size(20.dp))
+                                        }
+                                    }
+                                    Column(Modifier.weight(1f)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                            Surface(shape = RoundedCornerShape(50), color = Moss.copy(alpha = 0.12f)) {
+                                                Text("قسط", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Moss, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                            }
+                                        }
+                                        Text("قسط ${(item.paidSessions + 1).faDigits()} از ${item.totalSessions.faDigits()}", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    Text(if (isPrivacyMode) "••••••" else "${item.amount.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Moss)
+                                }
+                            }
+                        }
+                    }
+
+                    // لیست چک‌ها و طلب‌ها با تم لاجوردی آبی درخشان متمایز
+                    dayCheques.forEachIndexed { idx, item ->
+                        StaggeredItemEntrance(index = idx + dayInstallments.size) {
+                            Card(
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                                border = BorderStroke(1.dp, ChequeBlue.copy(alpha = 0.25f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .bounceClick(minScale = 0.96f)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Surface(shape = CircleShape, color = ChequeBlue.copy(alpha = 0.14f), modifier = Modifier.size(38.dp)) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(if (item.isCheque) "✍️" else "🤝", fontSize = 16.sp)
+                                        }
+                                    }
+                                    Column(Modifier.weight(1f)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                            Surface(shape = RoundedCornerShape(50), color = ChequeBlue.copy(alpha = 0.12f)) {
+                                                Text(if (item.isCheque) "چک صیادی" else "قرض/طلب", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = ChequeBlue, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                            }
+                                        }
+                                        Text("طرف حساب: ${item.personName}", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    Text(if (isPrivacyMode) "••••••" else "${item.amount.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (item.isReceivable) ChequeBlue else Coral)
+                                }
+                            }
+                        }
+                    }
+
+                    // لیست قلک‌ها و اهداف با تم طلایی
+                    dayGoals.forEachIndexed { idx, item ->
+                        StaggeredItemEntrance(index = idx + dayInstallments.size + dayCheques.size) {
+                            Card(
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                                border = BorderStroke(1.dp, GoldVip.copy(alpha = 0.25f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .bounceClick(minScale = 0.96f)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Surface(shape = CircleShape, color = GoldVip.copy(alpha = 0.14f), modifier = Modifier.size(38.dp)) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text("🎯", fontSize = 16.sp)
+                                        }
+                                    }
+                                    Column(Modifier.weight(1f)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                            Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.12f)) {
+                                                Text("هدف پس‌انداز", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                            }
+                                        }
+                                        Text("مبلغ هدف: ${item.targetAmount.money()} تومان", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    Text("${item.currentAmount.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = GoldVip)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OverviewStatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String,
+    icon: ImageVector,
+    tint: Color,
+    subText: String
+) {
+    Card(
+        modifier = modifier
+            .bounceClick(minScale = 0.96f),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = tint.copy(alpha = 0.12f),
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(icon, null, tint = tint, modifier = Modifier.size(16.dp))
+                    }
+                }
+                Text(subText, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = tint)
+            }
+
+            Text(title, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                value,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun JalaliMonthCalendarGrid(
+    year: Int,
+    month: Int,
+    selectedDay: JalaliDate,
+    activeInstallments: List<Installment>,
+    pendingCheques: List<ChequeOrDebt>,
+    goals: List<SavingsGoal>,
+    onDayClick: (JalaliDate) -> Unit
+) {
+    val totalDays = remember(year, month) { Jalali.monthLength(year, month) }
+    val firstDayOfWeekIndex = remember(year, month) {
+        val firstDayGregorian = Jalali.toGregorian(year, month, 1)
+        when (firstDayGregorian.dayOfWeek.toString()) {
+            "SATURDAY" -> 0
+            "SUNDAY" -> 1
+            "MONDAY" -> 2
+            "TUESDAY" -> 3
+            "WEDNESDAY" -> 4
+            "THURSDAY" -> 5
+            else -> 6 // FRIDAY
+        }
+    }
+
+    val today = remember { JalaliDate.today() }
+
+    val installmentEpochDays = remember(activeInstallments) {
+        activeInstallments.map { it.dueEpochDay }.toSet()
+    }
+    val chequeEpochDays = remember(pendingCheques) {
+        pendingCheques.map { it.dueEpochDay }.toSet()
+    }
+    val goalEpochDays = remember(goals) {
+        goals.map { it.targetEpochDay }.toSet()
+    }
+
+    // پیش‌محاسبه داده‌های روزهای ماه برای صفر شدن لگ حین اسکرول
+    val monthDayInfos = remember(year, month, installmentEpochDays, chequeEpochDays, goalEpochDays) {
+        (1..totalDays).map { d ->
+            val date = JalaliDate(year, month, d)
+            val epochDay = date.toLocalDate().toEpochDay()
+            Triple(
+                date,
+                epochDay,
+                Triple(
+                    epochDay in installmentEpochDays,
+                    epochDay in chequeEpochDays,
+                    epochDay in goalEpochDays
+                )
+            )
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        var dayCounter = 1
+        val totalCells = firstDayOfWeekIndex + totalDays
+        val rows = (totalCells + 6) / 7
+
+        for (row in 0 until rows) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                for (col in 0 until 7) {
+                    val cellIndex = row * 7 + col
+                    if (cellIndex < firstDayOfWeekIndex || dayCounter > totalDays) {
+                        Spacer(Modifier.size(36.dp))
+                    } else {
+                        val d = dayCounter
+                        val (thisDate, _, events) = monthDayInfos[d - 1]
+                        val isSelected = selectedDay.jy == year && selectedDay.jm == month && selectedDay.jd == d
+                        val isToday = today.jy == year && today.jm == month && today.jd == d
+                        val (hasInstallment, hasCheque, hasGoal) = events
+
+                        CalendarDayCell(
+                            day = d,
+                            isSelected = isSelected,
+                            isToday = isToday,
+                            isFriday = col == 6,
+                            hasInstallment = hasInstallment,
+                            hasCheque = hasCheque,
+                            hasGoal = hasGoal,
+                            onClick = { onDayClick(thisDate) }
+                        )
+                        dayCounter++
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalendarDayCell(
+    day: Int,
+    isSelected: Boolean,
+    isToday: Boolean,
+    isFriday: Boolean,
+    hasInstallment: Boolean,
+    hasCheque: Boolean,
+    hasGoal: Boolean,
+    onClick: () -> Unit
+) {
+    val cellScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.12f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
+        label = "cell_scale"
+    )
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = when {
+            isSelected -> MaterialTheme.colorScheme.primary
+            isToday -> MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+            else -> Color.Transparent
+        },
+        border = if (isToday && !isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+        modifier = Modifier
+            .size(36.dp)
+            .graphicsLayer {
+                scaleX = cellScale
+                scaleY = cellScale
+            }
+            .bounceClick(minScale = 0.88f)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                day.faDigits(),
+                fontSize = 12.sp,
+                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
+                color = when {
+                    isSelected -> MaterialTheme.colorScheme.onPrimary
+                    isFriday -> Coral
+                    else -> MaterialTheme.colorScheme.onSurface
+                }
+            )
+
+            // نشانگرهای نقطه‌ای رویدادهای مالی با رنگ‌های کاملاً تفکیک‌شده
+            if (hasInstallment || hasCheque || hasGoal) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 1.dp)
+                ) {
+                    if (hasInstallment) {
+                        // سبز زمردی برای اقساط
+                        Box(Modifier.size(4.dp).clip(CircleShape).background(if (isSelected) Color.White else Moss))
+                    }
+                    if (hasCheque) {
+                        // آبی لاجوردی درخشان برای چک‌ها و طلب‌ها
+                        Box(Modifier.size(4.dp).clip(CircleShape).background(if (isSelected) Color.White else ChequeBlue))
+                    }
+                    if (hasGoal) {
+                        // طلایی کهربایی برای قلک‌های هدف
+                        Box(Modifier.size(4.dp).clip(CircleShape).background(if (isSelected) Color.White else GoldVip))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DotLegend(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(Modifier.size(6.dp).clip(CircleShape).background(color))
+        Text(label, fontSize = 9.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
