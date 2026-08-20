@@ -28,6 +28,9 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(profile: UserProfile): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(profiles: List<UserProfile>): List<Long>
+
     @Update
     suspend fun update(profile: UserProfile)
 

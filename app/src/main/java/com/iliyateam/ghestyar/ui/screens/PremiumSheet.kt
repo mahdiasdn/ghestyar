@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -183,13 +184,43 @@ fun PremiumSheet(
                 )
 
                 VipFeature(
+                    icon = Icons.Rounded.Groups,
+                    title = "مدیریت صندوق‌های وام خانوادگی و گردونه قرعه‌کشی",
+                    desc = "مدیریت واریزی اعضا، گردونه شانس متحرک ماهانه و گزارش‌گیری پیام‌رسان‌ها"
+                )
+                VipFeature(
                     icon = Icons.Rounded.AutoAwesome,
-                    title = "مشاور هوشمند استراتژی تسویه بدهی (هوش مالی)",
-                    desc = "فرمول‌های Snowball و Avalanche جهت تسویه زودهنگام و کاهش سود بانکی"
+                    title = "بهینه‌ساز استراتژی تسویه و کاهش سود بانکی (بهمن)",
+                    desc = "محاسبه دقیق صرفه‌جویی چند میلیونی در پرداخت سود بانکی با اولویت‌بندی هوشمند"
+                )
+                VipFeature(
+                    icon = Icons.Rounded.Widgets,
+                    title = "ویجت‌های تعاملی و زنده صفحه اصلی گوشی",
+                    desc = "روزشمار زنده اقساط، مانده بدهی و دسترسی فوری بدون نیاز به باز کردن برنامه"
+                )
+                VipFeature(
+                    icon = Icons.Rounded.Palette,
+                    title = "شخصی‌سازی اشرافی با تم‌های لوکس VIP",
+                    desc = "دسترسی به تم‌های طلایی اشرافی (Obsidian Gold)، زمردی و یاقوتی اختصاصی"
+                )
+                VipFeature(
+                    icon = Icons.Rounded.PictureAsPdf,
+                    title = "تولید دفترچه رسمی بانکی اقساط (PDF A4) و اکسل",
+                    desc = "صدور دفترچه رسمی بانکی با جدول سررسید، بارکد و محل امضا جهت پرینت"
+                )
+                VipFeature(
+                    icon = Icons.Rounded.Timeline,
+                    title = "پیش‌بینی هوشمند جریان نقدینگی ۶ ماه آینده",
+                    desc = "تحلیل آینده‌نگر موجودی با احتساب تمام اقساط و سررسید چک‌ها"
+                )
+                VipFeature(
+                    icon = Icons.AutoMirrored.Rounded.Send,
+                    title = "پیامک‌ساز و یادآور هوشمند تعهدات به بدهکاران و ضامنین",
+                    desc = "تولید متن‌های رسمی و دوستانه آماده ارسال با اطلاعات قسط و شماره کارت"
                 )
                 VipFeature(
                     icon = Icons.Rounded.AllInclusive,
-                    title = "ثبت نامحدود اقساط، وام‌ها و چک‌های صیادی",
+                    title = "ثبت نامحدود اقساط، وام‌ها، قلک‌ها و چک‌های صیادی",
                     desc = "مدیریت بدون سقف تمام تعهدات مالی (در نسخه رایگان تا ۴ قسط)"
                 )
                 VipFeature(
@@ -198,19 +229,14 @@ fun PremiumSheet(
                     desc = "تفکیک کامل حساب‌های شخصی، خانوادگی، شرکت و فروشگاه"
                 )
                 VipFeature(
-                    icon = Icons.Rounded.TableChart,
-                    title = "خروجی جامع اکسل (CSV) و بیلان تفصیلی",
-                    desc = "فایل رسمی جهت ارائه به بانک، حسابدار، ضامن و شرکا"
-                )
-                VipFeature(
-                    icon = Icons.Rounded.CloudUpload,
-                    title = "پشتیبان‌گیری ابری و بازیابی خودکار داده‌ها",
-                    desc = "امنیت ۱۰۰٪ اطلاعات حتی هنگام تعویض گوشی همراه"
+                    icon = Icons.Rounded.FileDownload,
+                    title = "پشتیبان‌گیری آفلاین و بازیابی ایمن تمام اطلاعات",
+                    desc = "ذخیره فایل پشتیبان جامع با یک لمس و بازیابی کامل در تمام دستگاه‌ها"
                 )
                 VipFeature(
                     icon = Icons.Rounded.Block,
                     title = "حذف کامل تبلیغات و تجربه بدون وقفه",
-                    desc = "محیطی تمیز، آرامش‌بخش و سریع"
+                    desc = "محیطی تمیز، آرامش‌بخش و فوق‌العاده سریع"
                 )
             }
 
@@ -286,12 +312,18 @@ private fun VipFeature(
             }
         }
         Column(Modifier.weight(1f)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(Icons.Rounded.Star, null, tint = GoldVip, modifier = Modifier.size(13.dp))
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
             Text(
                 desc,
                 style = MaterialTheme.typography.bodySmall,

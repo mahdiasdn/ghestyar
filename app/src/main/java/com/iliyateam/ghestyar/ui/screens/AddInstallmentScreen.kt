@@ -50,13 +50,17 @@ fun AddInstallmentScreen(
         colorIndex: Int,
         category: String,
         remind: Boolean,
-        note: String
+        note: String,
+        destination: String
     ) -> Unit
 ) {
     BackHandler(onBack = onBack)
 
     var title by rememberSaveable {
         mutableStateOf(editingItem?.title ?: "")
+    }
+    var destination by rememberSaveable {
+        mutableStateOf(editingItem?.destination ?: "")
     }
     var amountDigits by rememberSaveable {
         mutableStateOf(editingItem?.amount?.toString() ?: "")
@@ -174,26 +178,118 @@ fun AddInstallmentScreen(
                 }
             }
 
-            // ۳. فیلد مبلغ هر قسط
-            OutlinedTextField(
-                value = if (amountDigits.isEmpty()) "" else amount.money(),
-                onValueChange = { v ->
-                    amountDigits = v.filter { it.isDigit() }.take(12)
-                },
-                label = { Text("مبلغ هر قسط (تومان)") },
-                placeholder = { Text("مثلاً ۲,۰۴۰,۰۰۰") },
-                leadingIcon = {
-                    Icon(Icons.Rounded.AccountBalanceWallet, null, tint = Moss, modifier = Modifier.size(20.dp))
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
+            // ۳. فیلد مقصد پرداخت (بانک، BNPL مانند اسنپ‌پی، دیجی‌پی یا شخص)
+            val isDark = isSystemInDarkTheme()
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                OutlinedTextField(
+                    value = destination,
+                    onValueChange = { destination = it },
+                    label = { Text("مقصد پرداخت (بانک، BNPL، صندوق...)") },
+                    placeholder = { Text("مثلاً اسنپ‌پی، بلوبانک، بانک رسالت...") },
+                    leadingIcon = {
+                        Icon(Icons.Rounded.AccountBalance, null, tint = Moss, modifier = Modifier.size(20.dp))
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // چیپ‌های پیشنهادات سریع بانک‌ها و سرویس‌های BNPL
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    contentPadding = PaddingValues(horizontal = 2.dp)
+                ) {
+                    items(com.iliyateam.ghestyar.data.InstallmentProviders.popularSuggestions) { sugg ->
+                        val isSelected = destination.trim() == sugg
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { destination = if (isSelected) "" else sugg },
+                            label = { Text(sugg, fontSize = 10.sp) },
+                            shape = RoundedCornerShape(50),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer else MintSoft,
+                                selectedLabelColor = if (isDark) MossLight else MossDeep
+                            )
+                        )
+                    }
+                }
+            }
+
+            // ۴. فیلد مبلغ هر قسط
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                OutlinedTextField(
+                    value = if (amountDigits.isEmpty()) "" else amount.money(),
+                    onValueChange = { v ->
+                        amountDigits = v.cleanNumericDigits(12)
+                    },
+                    label = { Text("مبلغ هر قسط (تومان)") },
+                    placeholder = { Text("مثلاً ۲,۰۴۰,۰۰۰") },
+                    leadingIcon = {
+                        Icon(Icons.Rounded.AccountBalanceWallet, null, tint = Moss, modifier = Modifier.size(20.dp))
+                    },
+                    trailingIcon = {
+                        if (amountDigits.isNotEmpty()) {
+                            IconButton(onClick = { amountDigits = "" }, modifier = Modifier.size(28.dp)) {
+                                Icon(Icons.Rounded.Close, "پاک کردن", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // نمایش زنده تبدیل مبلغ به حروف فارسی
+                if (amount > 0L) {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isDark) MaterialTheme.colorScheme.surfaceContainerHigh else MintSoft.copy(alpha = 0.85f),
+                        border = BorderStroke(1.dp, if (isDark) MossLight.copy(alpha = 0.25f) else Moss.copy(alpha = 0.2f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text("✍️", fontSize = 12.sp)
+                            Text(
+                                "معادل: ${amount.toPersianWords("تومان")}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (isDark) MossLight else MossDeep
+                            )
+                        }
+                    }
+                }
+
+                // کلیدهای سریع افزایش مبلغ
+                val quickIncrements = listOf(100_000L, 500_000L, 1_000_000L, 5_000_000L, 10_000_000L)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    contentPadding = PaddingValues(horizontal = 2.dp)
+                ) {
+                    items(quickIncrements) { inc ->
+                        SuggestionChip(
+                            onClick = {
+                                val cur = amountDigits.toLongOrNull() ?: 0L
+                                amountDigits = (cur + inc).toString()
+                            },
+                            label = { Text("+${inc.money()}", fontSize = 10.sp) },
+                            shape = RoundedCornerShape(50)
+                        )
+                    }
+                }
+            }
 
             // ۴. تعداد اقساط
             Card(
@@ -289,8 +385,6 @@ fun AddInstallmentScreen(
             }
 
             // ۶. سوییچر دوره پرداخت (ماهانه / هفتگی / سفارشی - عکس ۳)
-            val isDark = isSystemInDarkTheme()
-
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("دوره پرداخت", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Surface(
@@ -423,7 +517,7 @@ fun AddInstallmentScreen(
         ) {
             Button(
                 onClick = {
-                    onSave(title, amount, due, sessions, 0, category, remind, note)
+                    onSave(title, amount, due, sessions, 0, category, remind, note, destination)
                 },
                 enabled = isValid,
                 modifier = Modifier

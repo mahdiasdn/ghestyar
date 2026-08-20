@@ -51,9 +51,13 @@ fun OverviewScreen(
     onAddInstallment: () -> Unit,
     onOpenCashflow: () -> Unit,
     onOpenGoalsCheques: () -> Unit,
-    onDetailInstallment: (Installment) -> Unit
+    onDetailInstallment: (Installment) -> Unit,
+    onPremium: () -> Unit = {},
+    selectedDashboardTab: Int = 0,
+    onDashboardTabChange: (Int) -> Unit = {}
 ) {
     val activeInstallments by vm.active.collectAsStateWithLifecycle()
+    val historyInstallments by vm.history.collectAsStateWithLifecycle()
     val stats by vm.stats.collectAsStateWithLifecycle()
     val cashflow by vm.cashflowSummary.collectAsStateWithLifecycle()
     val pendingCheques by vm.pendingChequesAndDebts.collectAsStateWithLifecycle()
@@ -63,58 +67,128 @@ fun OverviewScreen(
     var calendarMonth by remember { mutableStateOf(JalaliDate.today()) }
     var selectedDay by remember { mutableStateOf(JalaliDate.today()) }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // ۱. نوار هدر بالا با statusBarsPadding
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 18.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = Moss,
-                        modifier = Modifier.size(38.dp),
-                        shadowElevation = 2.dp
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Rounded.Dashboard, null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        }
-                    }
-                    Spacer(Modifier.width(10.dp))
-                    Column {
-                        Text("داشبورد و تقویم مالی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        Text(LocalDate.now().formatJalaliWithWeekday(), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Moss,
+                    modifier = Modifier.size(38.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            if (selectedDashboardTab == 0) Icons.Rounded.Dashboard else Icons.Rounded.Analytics,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text(
+                        if (selectedDashboardTab == 0) "داشبورد و تقویم مالی" else "آمار و تحلیل هوشمند",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(LocalDate.now().formatJalaliWithWeekday(), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
 
-                // دکمه ماشین حساب سریع وام
-                Button(
-                    onClick = onOpenCalculator,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                    modifier = Modifier.bounceClick(minScale = 0.94f)
-                ) {
-                    Icon(Icons.Rounded.Calculate, null, tint = Moss, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("ماشین‌حساب وام", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            // دکمه ماشین حساب سریع وام
+            Button(
+                onClick = onOpenCalculator,
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier.bounceClick(minScale = 0.94f)
+            ) {
+                Icon(Icons.Rounded.Calculate, null, tint = Moss, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("ماشین‌حساب وام", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+
+        // ۲. سوییچر ۲ تبه بین تقویم/داشبورد و آمار/تحلیل جامع
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 4.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                val tabs = listOf(
+                    0 to ("تقویم و داشبورد" to Icons.Rounded.CalendarMonth),
+                    1 to ("آمار و نمودارها" to Icons.Rounded.Analytics)
+                )
+                tabs.forEach { (index, data) ->
+                    val (title, icon) = data
+                    val isSelected = selectedDashboardTab == index
+                    Surface(
+                        onClick = { onDashboardTabChange(index) },
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) Moss else Color.Transparent,
+                        modifier = Modifier
+                            .weight(1f)
+                            .bounceClick(minScale = 0.96f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(vertical = 9.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                icon,
+                                contentDescription = null,
+                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                title,
+                                fontSize = 11.5.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        // ۲. کارت‌های خلاصه Bento
-        item {
+        if (selectedDashboardTab == 1) {
+            AnalyticsTab(
+                stats = stats,
+                activeInstallments = activeInstallments,
+                historyInstallments = historyInstallments,
+                isPremium = isPremium,
+                onOpenPremium = onPremium
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // ۱. کارت‌های خلاصه Bento
+                item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -127,8 +201,8 @@ fun OverviewScreen(
                 ) {
                     OverviewStatCard(
                         modifier = Modifier.weight(1f),
-                        title = "تعهد اقساط این ماه",
-                        value = if (isPrivacyMode) "••••••" else "${stats.monthlyCommitment.money()} ت",
+                        title = "اقساط فعال این ماه",
+                        value = if (isPrivacyMode) "••••••" else "${cashflow.thisMonthInstallments.money()} ت",
                         icon = Icons.AutoMirrored.Rounded.ReceiptLong,
                         tint = Moss,
                         subText = "${stats.activeCount.faDigits()} قسط فعال"
@@ -136,11 +210,11 @@ fun OverviewScreen(
 
                     OverviewStatCard(
                         modifier = Modifier.weight(1f),
-                        title = "تراز دخل‌وخرج این ماه",
-                        value = if (isPrivacyMode) "••••••" else "${cashflow.netBalance.money()} ت",
+                        title = "نقدینگی آزاد این ماه",
+                        value = if (isPrivacyMode) "••••••" else "${cashflow.remainingAfterInstallments.money()} ت",
                         icon = Icons.Rounded.AccountBalanceWallet,
-                        tint = if (cashflow.netBalance >= 0) Moss else Coral,
-                        subText = if (cashflow.netBalance >= 0) "تراز مثبت ✨" else "تراز منفی ⚠️"
+                        tint = if (cashflow.remainingAfterInstallments >= 0) Moss else Coral,
+                        subText = if (cashflow.remainingAfterInstallments >= 0) "پس از کسر اقساط ✨" else "کسری بودجه ماه ⚠️"
                     )
                 }
             }
@@ -415,6 +489,8 @@ fun OverviewScreen(
         }
     }
 }
+    }
+}
 
 @Composable
 private fun OverviewStatCard(
@@ -638,3 +714,5 @@ private fun DotLegend(color: Color, label: String) {
         Text(label, fontSize = 9.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
+
+

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,12 +46,14 @@ import com.iliyateam.ghestyar.ui.theme.*
 import com.iliyateam.ghestyar.util.*
 import com.iliyateam.ghestyar.widget.GhestYarWidgetProvider
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 enum class MainNavTab(val title: String, val icon: ImageVector) {
     OVERVIEW("داشبورد", Icons.Rounded.Dashboard),
     INSTALLMENTS("اقساط", Icons.AutoMirrored.Rounded.ReceiptLong),
     CASHFLOW("دخل‌خرج", Icons.Rounded.AccountBalanceWallet),
-    GOALS_CHEQUES("قلک و چک", Icons.Rounded.Savings),
+    CHEQUES("چک‌ها", Icons.Rounded.HistoryEdu),
+    SERVICES("خدمات", Icons.Rounded.Widgets),
     SETTINGS("تنظیمات", Icons.Rounded.Settings)
 }
 
@@ -66,15 +69,39 @@ class MainActivity : ComponentActivity() {
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
-    private val createCsv =
-        registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+    private var pendingExportItems: List<Installment> = emptyList()
+    private var pendingExportScope: String = "همه اقساط"
+    private var pendingExportIsPdf: Boolean = true
+
+    private val createExportDoc =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
             if (uri != null) {
                 lifecycleScope.launch {
                     try {
-                        Exporter.csv(this@MainActivity, uri, vm.allOnce())
-                        Toast.makeText(this@MainActivity, "خروجی اکسل با موفقیت ذخیره شد ✅", Toast.LENGTH_SHORT).show()
+                        if (pendingExportIsPdf) {
+                            Exporter.pdf(this@MainActivity, uri, pendingExportItems, pendingExportScope)
+                            Toast.makeText(this@MainActivity, "گزارش PDF با موفقیت ذخیره شد ✅", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Exporter.excelXlsx(this@MainActivity, uri, pendingExportItems, pendingExportScope)
+                            Toast.makeText(this@MainActivity, "فایل اکسل (.xlsx) با موفقیت ذخیره شد ✅", Toast.LENGTH_SHORT).show()
+                        }
                     } catch (e: Exception) {
-                        Toast.makeText(this@MainActivity, "خطا در خروجی فایل: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "خطا در ذخیره فایل: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+    private var pendingBookletInstallment: Installment? = null
+    private val createBookletDoc =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
+            if (uri != null && pendingBookletInstallment != null) {
+                lifecycleScope.launch {
+                    try {
+                        Exporter.loanBookletPdf(this@MainActivity, uri, pendingBookletInstallment!!)
+                        Toast.makeText(this@MainActivity, "دفترچه رسمی PDF با موفقیت صادر شد 🖨️", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "خطا در ایجاد دفترچه: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -85,8 +112,9 @@ class MainActivity : ComponentActivity() {
             if (uri != null) {
                 lifecycleScope.launch {
                     try {
-                        Exporter.jsonBackup(this@MainActivity, uri, vm.allOnce())
-                        Toast.makeText(this@MainActivity, "پشتیبان با موفقیت ذخیره شد ☁️", Toast.LENGTH_SHORT).show()
+                        val backupData = vm.getFullBackupData()
+                        Exporter.jsonBackup(this@MainActivity, uri, backupData)
+                        Toast.makeText(this@MainActivity, "پشتیبان جامع تمام اطلاعات با موفقیت ذخیره شد 💾", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(this@MainActivity, "خطا در ذخیره فایل پشتیبان: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -99,11 +127,17 @@ class MainActivity : ComponentActivity() {
             if (uri != null) {
                 lifecycleScope.launch {
                     try {
-                        val restoredItems = Exporter.jsonRestore(this@MainActivity, uri)
-                        vm.restoreBackup(restoredItems) { count ->
+                        val restoredData = Exporter.jsonRestore(this@MainActivity, uri)
+                        vm.restoreFullBackup(restoredData) { iCount, tCount, gCount, cCount ->
+                            val parts = mutableListOf<String>()
+                            if (iCount > 0) parts.add("${iCount.faDigits()} قسط")
+                            if (tCount > 0) parts.add("${tCount.faDigits()} تراکنش")
+                            if (gCount > 0) parts.add("${gCount.faDigits()} قلک")
+                            if (cCount > 0) parts.add("${cCount.faDigits()} چک و طلب")
+                            val summary = if (parts.isEmpty()) "اطلاعاتی یافت نشد" else parts.joinToString("، ")
                             Toast.makeText(
                                 this@MainActivity,
-                                "تعداد ${count.faDigits()} قسط با موفقیت بازیابی شد ✅",
+                                "بازیابی کامل با موفقیت انجام شد ✅ ($summary)",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -128,8 +162,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeMode by vm.themeMode.collectAsStateWithLifecycle()
             val fontScale by vm.fontScale.collectAsStateWithLifecycle()
+            val vipTheme by vm.vipColorTheme.collectAsStateWithLifecycle()
 
-            QestYarTheme(themeMode = themeMode, fontScale = fontScale) {
+            QestYarTheme(themeMode = themeMode, fontScale = fontScale, vipTheme = vipTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -142,13 +177,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    companion object {
+        var hasShownSplash: Boolean = false
+    }
+
     @Composable
     private fun AppRoot() {
         val context = LocalContext.current
-        var showSplash by remember { mutableStateOf(true) }
+        var showSplash by rememberSaveable { mutableStateOf(!hasShownSplash) }
 
         if (showSplash) {
-            SplashScreen(onFinish = { showSplash = false })
+            SplashScreen(onFinish = {
+                hasShownSplash = true
+                showSplash = false
+            })
             return
         }
 
@@ -164,7 +206,9 @@ class MainActivity : ComponentActivity() {
         var detailedInstallment by remember { mutableStateOf<Installment?>(null) }
         var showPremium by remember { mutableStateOf(false) }
         var showLoanCalculator by remember { mutableStateOf(false) }
+        var showExportReports by rememberSaveable { mutableStateOf(false) }
         var isPremium by remember { mutableStateOf(Premium.isPremium(context)) }
+        var overviewSubTab by rememberSaveable { mutableIntStateOf(0) }
 
         val activeInstallments by vm.active.collectAsStateWithLifecycle()
         val historyInstallments by vm.history.collectAsStateWithLifecycle()
@@ -182,6 +226,10 @@ class MainActivity : ComponentActivity() {
 
         BackHandler(enabled = showLoanCalculator) {
             showLoanCalculator = false
+        }
+
+        BackHandler(enabled = showExportReports) {
+            showExportReports = false
         }
 
         BackHandler(enabled = detailedInstallment != null) {
@@ -258,12 +306,12 @@ class MainActivity : ComponentActivity() {
                             currentScreen = ActiveScreen.MAIN
                             editingInstallment = null
                         },
-                        onSave = { title, amount, due, sessions, color, category, remind, note ->
+                        onSave = { title, amount, due, sessions, color, category, remind, note, destination ->
                             if (itemToEdit != null) {
-                                vm.update(itemToEdit, title, amount, due, sessions, color, category, remind, note)
+                                vm.update(itemToEdit, title, amount, due, sessions, color, category, remind, note, destination)
                                 Toast.makeText(context, "تغییرات با موفقیت ذخیره شد ✅", Toast.LENGTH_SHORT).show()
                             } else {
-                                vm.add(title, amount, due, sessions, color, category, remind, note)
+                                vm.add(title, amount, due, sessions, color, category, remind, note, destination)
                                 Toast.makeText(
                                     context,
                                     if (remind) "قسط ثبت شد و یادآوری فعال است 🔔" else "قسط با موفقیت ثبت شد ✅",
@@ -278,6 +326,24 @@ class MainActivity : ComponentActivity() {
                 ActiveScreen.MAIN -> {
                     Scaffold(
                         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        topBar = {
+                            Surface(
+                                color = MaterialTheme.colorScheme.surface,
+                                tonalElevation = 2.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .statusBarsPadding()
+                                ) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                        thickness = 1.dp
+                                    )
+                                }
+                            }
+                        },
                         bottomBar = {
                             NavigationBar(
                                 containerColor = MaterialTheme.colorScheme.surface,
@@ -343,8 +409,11 @@ class MainActivity : ComponentActivity() {
                                         onOpenCalculator = { showLoanCalculator = true },
                                         onAddInstallment = { currentScreen = ActiveScreen.ADD_INSTALLMENT },
                                         onOpenCashflow = { switchToTab(MainNavTab.CASHFLOW.ordinal) },
-                                        onOpenGoalsCheques = { switchToTab(MainNavTab.GOALS_CHEQUES.ordinal) },
-                                        onDetailInstallment = { item -> detailedInstallment = item }
+                                        onOpenGoalsCheques = { switchToTab(MainNavTab.SERVICES.ordinal) },
+                                        onDetailInstallment = { item -> detailedInstallment = item },
+                                        onPremium = { showPremium = true },
+                                        selectedDashboardTab = overviewSubTab,
+                                        onDashboardTabChange = { overviewSubTab = it }
                                     )
                                 }
                                 MainNavTab.INSTALLMENTS -> {
@@ -358,7 +427,11 @@ class MainActivity : ComponentActivity() {
                                         },
                                         onDetail = { item -> detailedInstallment = item },
                                         onPremium = { showPremium = true },
-                                        onExportExcel = { createCsv.launch("ghestyar-report.csv") },
+                                        onOpenAnalytics = {
+                                            overviewSubTab = 1
+                                            switchToTab(MainNavTab.OVERVIEW.ordinal)
+                                        },
+                                        onExportExcel = { showExportReports = true },
                                         onBackup = { createJson.launch("ghestyar-backup.json") },
                                         onRestore = { restoreJson.launch(arrayOf("application/json", "*/*")) }
                                     )
@@ -370,11 +443,23 @@ class MainActivity : ComponentActivity() {
                                         onOpenPremium = { showPremium = true }
                                     )
                                 }
-                                MainNavTab.GOALS_CHEQUES -> {
-                                    GoalsAndChequesScreen(
+                                MainNavTab.CHEQUES -> {
+                                    ChequesScreen(
                                         vm = vm,
                                         isPremium = isPremium,
                                         onOpenPremium = { showPremium = true }
+                                    )
+                                }
+                                MainNavTab.SERVICES -> {
+                                    ServicesScreen(
+                                        vm = vm,
+                                        isPremium = isPremium,
+                                        onOpenPremium = { showPremium = true },
+                                        onOpenCalculator = { showLoanCalculator = true },
+                                        onGenerateBooklet = { inst ->
+                                            pendingBookletInstallment = inst
+                                            createBookletDoc.launch("دفترچه_اقساط_${inst.title}.pdf")
+                                        }
                                     )
                                 }
                                 MainNavTab.SETTINGS -> {
@@ -384,7 +469,7 @@ class MainActivity : ComponentActivity() {
                                         onOpenCalculator = { showLoanCalculator = true },
                                         onOpenPremium = { showPremium = true },
                                         onOpenAbout = { currentScreen = ActiveScreen.ABOUT },
-                                        onExportExcel = { createCsv.launch("ghestyar-report.csv") },
+                                        onExportExcel = { showExportReports = true },
                                         onBackup = { createJson.launch("ghestyar-backup.json") },
                                         onRestore = { restoreJson.launch(arrayOf("application/json", "*/*")) }
                                     )
@@ -409,6 +494,11 @@ class MainActivity : ComponentActivity() {
                     vm.markPaid(item)
                     com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(context)
                     Toast.makeText(context, "قسط پرداخت شد! 🎉", Toast.LENGTH_SHORT).show()
+                },
+                onUnmarkPaid = {
+                    vm.unmarkPaid(item)
+                    com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(context)
+                    Toast.makeText(context, "پرداخت قسط بازگردانی شد ↩️", Toast.LENGTH_SHORT).show()
                 },
                 onDelete = {
                     vm.delete(item)
@@ -457,6 +547,22 @@ class MainActivity : ComponentActivity() {
                     isPremium = false
                     showPremium = false
                     Toast.makeText(context, "حالت به نسخه رایگان تغییر یافت", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+
+        if (showExportReports) {
+            val allList by vm.all.collectAsStateWithLifecycle()
+            ExportReportSheet(
+                allInstallments = allList,
+                onDismiss = { showExportReports = false },
+                onSaveDocument = { isPdf, items, titleScope ->
+                    pendingExportIsPdf = isPdf
+                    pendingExportItems = items
+                    pendingExportScope = titleScope
+                    val ext = if (isPdf) "pdf" else "xlsx"
+                    val defaultName = "ghestyar-report-${LocalDate.now().formatJalali().replace("/", "-")}.$ext"
+                    createExportDoc.launch(defaultName)
                 }
             )
         }

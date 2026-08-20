@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import com.iliyateam.ghestyar.ui.components.AppLogo
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
@@ -23,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.iliyateam.ghestyar.R
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.theme.GoldVip
 import com.iliyateam.ghestyar.ui.theme.Moss
@@ -67,16 +70,11 @@ fun AboutScreen(onBack: () -> Unit) {
             Spacer(Modifier.height(10.dp))
 
             // لوگوی بزرگ برنامه
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Moss,
-                modifier = Modifier.size(80.dp),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text("ق", color = Color.White, fontSize = 42.sp, fontWeight = FontWeight.Bold)
-                }
-            }
+            AppLogo(
+                modifier = Modifier
+                    .size(92.dp)
+                    .bounceClick(minScale = 0.94f)
+            )
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("قسط‌یار", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)

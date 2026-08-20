@@ -13,7 +13,8 @@ data class Transaction(
     val category: String,       // دسته‌بندی
     val epochDay: Long,         // تاریخ ثبت
     val note: String = "",
-    val profileId: Long = 1L
+    val profileId: Long = 1L,
+    val isRecurring: Boolean = false // تکرار ماهانه / درآمد یا هزینه ثابت
 )
 
 data class TransactionCategory(

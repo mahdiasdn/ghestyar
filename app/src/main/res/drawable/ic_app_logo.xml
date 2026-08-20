@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Ambient Glow -->
+    <path
+        android:fillColor="#4F46E5"
+        android:fillAlpha="0.12"
+        android:pathData="M 24,256 a 232,232 0 1,0 464,0 a 232,232 0 1,0 -464,0 Z" />
+
+    <path
+        android:fillColor="#6366F1"
+        android:fillAlpha="0.18"
+        android:pathData="M 44,256 a 212,212 0 1,0 424,0 a 212,212 0 1,0 -424,0 Z" />
+
+    <!-- Main Orb Base -->
+    <path
+        android:fillColor="#1E1B4B"
+        android:pathData="M 60,256 a 196,196 0 1,0 392,0 a 196,196 0 1,0 -392,0 Z" />
+
+    <!-- Orb Inner Highlight Layer (Centered at 256, 256) -->
+    <path
+        android:fillColor="#4F46E5"
+        android:fillAlpha="0.70"
+        android:pathData="M 86,256 a 170,170 0 1,0 340,0 a 170,170 0 1,0 -340,0 Z" />
+
+    <path
+        android:fillColor="#6366F1"
+        android:fillAlpha="0.80"
+        android:pathData="M 116,256 a 140,140 0 1,0 280,0 a 140,140 0 1,0 -280,0 Z" />
+
+    <!-- Upper Arc Highlight -->
+    <path
+        android:pathData="M 108,180 A 190,190 0 0 1 330,84"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.5"
+        android:strokeAlpha="0.30"
+        android:strokeLineCap="round" />
+
+    <!-- Group: Centered Coins -->
+    <group android:translateY="-36">
+        <!-- Shadow -->
+        <path
+            android:fillColor="#090D16"
+            android:fillAlpha="0.40"
+            android:pathData="M 148,350 a 110,20 0 1,0 220,0 a 110,20 0 1,0 -220,0 Z" />
+
+        <!-- Coin 1 (Bottom) -->
+        <path
+            android:fillColor="#B45309"
+            android:pathData="M 174,344 a 96,17 0 1,0 192,0 a 96,17 0 1,0 -192,0 Z" />
+        <path
+            android:fillColor="#F59E0B"
+            android:pathData="M 174,326 a 96,32 0 1,0 192,0 a 96,32 0 1,0 -192,0 Z" />
+
+        <!-- Coin 2 (Middle) -->
+        <path
+            android:fillColor="#C2410C"
+            android:pathData="M 158,309 a 92,16 0 1,0 184,0 a 92,16 0 1,0 -184,0 Z" />
+        <path
+            android:fillColor="#FBBF24"
+            android:pathData="M 158,292 a 92,30 0 1,0 184,0 a 92,30 0 1,0 -184,0 Z" />
+
+        <!-- Coin 3 (Top) -->
+        <path
+            android:fillColor="#D97706"
+            android:pathData="M 172,272 a 88,16 0 1,0 176,0 a 88,16 0 1,0 -176,0 Z" />
+        <path
+            android:fillColor="#FDE047"
+            android:pathData="M 172,256 a 88,29 0 1,0 176,0 a 88,29 0 1,0 -176,0 Z" />
+
+        <!-- Rim on Top Coin -->
+        <path
+            android:pathData="M 188,256 a 72,20 0 1,0 144,0 a 72,20 0 1,0 -144,0 Z"
+            android:strokeColor="#B45309"
+            android:strokeWidth="2.2"
+            android:strokeAlpha="0.40" />
+
+        <!-- Highlight Glint -->
+        <group
+            android:pivotX="228"
+            android:pivotY="245"
+            android:rotation="-14">
+            <path
+                android:fillColor="#FFFFFF"
+                android:fillAlpha="0.65"
+                android:pathData="M 202,245 a 26,9 0 1,0 52,0 a 26,9 0 1,0 -52,0 Z" />
+        </group>
+    </group>
+
+</vector>

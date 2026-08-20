@@ -184,17 +184,99 @@ fun String.enDigits(): String = buildString {
     }
 }
 
+/** پاکسازی ورودی متنی و استخراج ارقام استاندارد */
+fun String.cleanNumericDigits(maxDigits: Int = 14): String =
+    enDigits().filter { it.isDigit() }.take(maxDigits)
+
 fun Int.faDigits() = toString().faDigits()
 fun Long.faDigits() = toString().faDigits()
 
 fun Long.money(): String =
     java.text.DecimalFormat("#,###").format(this).replace(",", "٬").faDigits()
 
+object PersianNumberHelper {
+    private val yekan = arrayOf("", "یک", "دو", "سه", "چهار", "پنج", "شش", "هفت", "هشت", "نه")
+    private val dahgan = arrayOf("", "", "بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "هشتاد", "نود")
+    private val dahToNoozdah = arrayOf("ده", "یازده", "دوازده", "سیزده", "چهارده", "پانزده", "شانزده", "هفده", "هجده", "نوزده")
+    private val sadgan = arrayOf("", "صد", "دویست", "سیصد", "چهارصد", "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد")
+    private val scales = arrayOf("", "هزار", "میلیون", "میلیارد", "تریلیون")
+
+    /** تبدیل مبلغ عددی به حروف فارسی (مثلاً ۲۵۰۰۰۰۰ -> دو میلیون و پانصد هزار تومان) */
+    fun toWords(number: Long, unit: String = "تومان"): String {
+        if (number == 0L) return if (unit.isBlank()) "صفر" else "صفر $unit"
+        if (number < 0) return "منفی " + toWords(-number, unit)
+
+        var n = number
+        val parts = mutableListOf<String>()
+        var scaleIndex = 0
+
+        while (n > 0 && scaleIndex < scales.size) {
+            val chunk = (n % 1000).toInt()
+            if (chunk > 0) {
+                val chunkWord = chunkToWords(chunk)
+                val scaleWord = scales[scaleIndex]
+                val part = if (scaleWord.isNotEmpty()) "$chunkWord $scaleWord" else chunkWord
+                parts.add(0, part)
+            }
+            n /= 1000
+            scaleIndex++
+        }
+
+        val text = parts.joinToString(" و ")
+        return if (unit.isNotBlank()) "$text $unit" else text
+    }
+
+    private fun chunkToWords(chunk: Int): String {
+        val s = chunk / 100
+        val d = (chunk % 100) / 10
+        val y = chunk % 10
+
+        val words = mutableListOf<String>()
+        if (s in 1..9) words.add(sadgan[s])
+
+        if (d == 1) {
+            words.add(dahToNoozdah[y])
+        } else {
+            if (d in 2..9) words.add(dahgan[d])
+            if (y in 1..9) words.add(yekan[y])
+        }
+
+        return words.joinToString(" و ")
+    }
+
+    /** نمایش خلاصه و هوشمند مبالغ در کارت‌ها و نمودارها */
+    fun toCompact(amount: Long, unit: String = "تومان"): String {
+        return when {
+            amount >= 1_000_000_000L -> {
+                val b = amount.toDouble() / 1_000_000_000.0
+                String.format(java.util.Locale.US, "%.1f", b).trimEnd('0').trimEnd('.').faDigits() + " میلیارد " + unit
+            }
+            amount >= 1_000_000L -> {
+                val m = amount.toDouble() / 1_000_000.0
+                String.format(java.util.Locale.US, "%.1f", m).trimEnd('0').trimEnd('.').faDigits() + " میلیون " + unit
+            }
+            amount >= 1_000L -> {
+                val k = amount.toDouble() / 1_000.0
+                String.format(java.util.Locale.US, "%.1f", k).trimEnd('0').trimEnd('.').faDigits() + " هزار " + unit
+            }
+            else -> amount.money() + " " + unit
+        }
+    }
+}
+
+/** تبدیل مستقیم عدد به حروف فارسی */
+fun Long.toPersianWords(unit: String = "تومان"): String = PersianNumberHelper.toWords(this, unit)
+
+/** فرمت خلاصه و شکیل مبالغ بزرگ */
+fun Long.compactMoney(unit: String = "تومان"): String = PersianNumberHelper.toCompact(this, unit)
+
 fun JalaliDate.format(): String {
     val safeMonth = jm.coerceIn(1, 12)
     val safeDay = jd.coerceIn(1, Jalali.monthLength(jy, safeMonth))
     return "${safeDay.faDigits()} ${Jalali.months[safeMonth - 1]} ${jy.faDigits()}"
 }
+
+fun JalaliDate.formatJalali(): String = format()
 
 fun LocalDate.formatJalali(): String = toJalali().format()
 

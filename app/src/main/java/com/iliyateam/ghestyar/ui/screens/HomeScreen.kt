@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import com.iliyateam.ghestyar.ui.components.AppLogo
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -51,6 +52,7 @@ fun HomeScreen(
     onDetail: (Installment) -> Unit,
     onEdit: (Installment) -> Unit,
     onPremium: () -> Unit,
+    onOpenAnalytics: () -> Unit = {},
     onExportExcel: () -> Unit = {},
     onBackup: () -> Unit = {},
     onRestore: () -> Unit = {}
@@ -65,6 +67,8 @@ fun HomeScreen(
     var searchExpanded by remember { mutableStateOf(false) }
     var selectedFilterTab by remember { mutableIntStateOf(1) } // 0: همه, 1: فعال, 2: تسویه‌شده
     val isDark = isSystemInDarkTheme()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     val currentList = remember(active, history, selectedFilterTab, searchQuery, selectedCategory) {
         val baseList: List<Installment> = when (selectedFilterTab) {
@@ -96,7 +100,6 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .statusBarsPadding()
                         .padding(horizontal = 20.dp, vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -105,25 +108,21 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(42.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text("ق", color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
+                        AppLogo(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .bounceClick(minScale = 0.92f)
+                        )
 
                         Column {
                             Text(
-                                "سلام، خوش‌آمدید 👋",
+                                "مدیریت اقساط و وام‌ها",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                LocalDate.now().formatJalaliWithWeekday(),
+                                "${active.size.faDigits()} قسط فعال • ${Jalali.months[JalaliDate.today().jm - 1]} ${JalaliDate.today().jy.faDigits()}",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -132,8 +131,32 @@ fun HomeScreen(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        IconButton(
+                            onClick = onExportExcel,
+                            modifier = Modifier.size(38.dp)
+                        ) {
+                            Icon(
+                                Icons.Rounded.PictureAsPdf,
+                                contentDescription = "گزارش‌گیری PDF و اکسل",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        IconButton(
+                            onClick = onOpenAnalytics,
+                            modifier = Modifier.size(38.dp)
+                        ) {
+                            Icon(
+                                Icons.Rounded.Analytics,
+                                contentDescription = "آمار و تحلیل",
+                                modifier = Modifier.size(22.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
                         IconButton(
                             onClick = { searchExpanded = !searchExpanded },
                             modifier = Modifier.size(38.dp)
@@ -144,35 +167,6 @@ fun HomeScreen(
                                 modifier = Modifier.size(22.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        }
-
-                        // دکمه VIP کپسولی
-                        Surface(
-                            onClick = onPremium,
-                            shape = RoundedCornerShape(50),
-                            color = if (isPremium) GoldVip.copy(alpha = 0.16f) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
-                            modifier = Modifier
-                                .pulseGlow(enabled = !isPremium, minScale = 0.95f, maxScale = 1.05f)
-                                .bounceClick(minScale = 0.92f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    Icons.Rounded.Star,
-                                    null,
-                                    tint = if (isPremium) GoldVip else MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    if (isPremium) "VIP 👑" else "ارتقا",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isPremium) GoldVip else MaterialTheme.colorScheme.primary
-                                )
-                            }
                         }
                     }
                 }
@@ -342,7 +336,21 @@ fun HomeScreen(
                             InstallmentCard(
                                 item = item,
                                 onClick = { onDetail(item) },
-                                onPaid = { vm.markPaid(item) },
+                                onPaid = {
+                                    vm.markPaid(item)
+                                    scope.launch {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = "قسط «${item.title}» پرداخت شد ✅",
+                                            actionLabel = "بازگردانی ↩️",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            vm.unmarkPaid(item)
+                                        }
+                                    }
+                                },
+                                onUnmarkPaid = { vm.unmarkPaid(item) },
                                 onEdit = { onEdit(item) },
                                 onDelete = { vm.delete(item) }
                             )
@@ -351,6 +359,13 @@ fun HomeScreen(
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 88.dp, start = 16.dp, end = 16.dp)
+        )
 
         // دکمه شناور FAB با گوشه‌های ۲۸dp
         FloatingActionButton(
@@ -517,12 +532,12 @@ private fun NextDueTonalCard(active: List<Installment>) {
                 Spacer(Modifier.height(2.dp))
                 Text(
                     when {
-                        daysLeft > 1 -> "${daysLeft.toInt().faDigits()} روز مانده تا سررسید"
-                        daysLeft == 1L -> "فردا موعد سررسید است 🔔"
-                        daysLeft == 0L -> "امروز موعد پرداخت است ⚠️"
-                        else -> "${(-daysLeft).toInt().faDigits()} روز تأخیر در پرداخت 🚨"
+                        daysLeft > 1 -> "${due.formatJalali()} (${daysLeft.toInt().faDigits()} روز دیگر)"
+                        daysLeft == 1L -> "فردا (${due.formatJalali()}) 🔔"
+                        daysLeft == 0L -> "امروز موعد پرداخت است (${due.formatJalali()}) ⚠️"
+                        else -> "${(-daysLeft).toInt().faDigits()} روز تاخیر! (${due.formatJalali()}) 🚨"
                     },
-                    fontSize = 10.sp,
+                    fontSize = 10.5.sp,
                     color = if (daysLeft < 0) Coral else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
                 )

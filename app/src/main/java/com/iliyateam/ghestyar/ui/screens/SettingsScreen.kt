@@ -30,11 +30,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iliyateam.ghestyar.AppFontScale
 import com.iliyateam.ghestyar.AppThemeMode
 import com.iliyateam.ghestyar.MainViewModel
+import com.iliyateam.ghestyar.VipColorTheme
 import com.iliyateam.ghestyar.data.UserProfile
 import com.iliyateam.ghestyar.ui.components.PinLockDialog
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.theme.*
 import com.iliyateam.ghestyar.util.faDigits
+import com.iliyateam.ghestyar.widget.GhestYarWidgetProvider
 
 @Composable
 fun SettingsScreen(
@@ -48,6 +50,7 @@ fun SettingsScreen(
     onRestore: () -> Unit
 ) {
     val themeMode by vm.themeMode.collectAsStateWithLifecycle()
+    val vipColorTheme by vm.vipColorTheme.collectAsStateWithLifecycle()
     val fontScale by vm.fontScale.collectAsStateWithLifecycle()
     val isPrivacyMode by vm.isPrivacyMode.collectAsStateWithLifecycle()
     val isPinLockEnabled by vm.isPinLockEnabled.collectAsStateWithLifecycle()
@@ -59,6 +62,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     var showSetPinDialog by remember { mutableStateOf(false) }
     var showAddProfileDialog by remember { mutableStateOf(false) }
+    var showWidgetGuideDialog by remember { mutableStateOf(false) }
     var profileToDelete by remember { mutableStateOf<UserProfile?>(null) }
 
     Column(
@@ -74,7 +78,6 @@ fun SettingsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -136,7 +139,7 @@ fun SettingsScreen(
                         }
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            if (!isPremium && allProfiles.size >= 1) "حساب جدید (👑 VIP)" else "افزودن حساب جدید",
+                            if (!isPremium && allProfiles.size >= 1) "حساب جدید (⭐ VIP)" else "افزودن حساب جدید",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (!isPremium && allProfiles.size >= 1) GoldVip else Moss
@@ -242,7 +245,61 @@ fun SettingsScreen(
             }
         }
 
-        // بخش ۳: اندازه فونت و متون
+        // بخش ۳: تم‌های اشرافی لوکس VIP
+        SettingsSection(title = "تم‌های رنگی اشرافی (⭐ VIP)") {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    "پالت رنگی و استایل اشرافی اپلیکیشن را بر اساس سلیقه خود تغییر دهید:",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(VipColorTheme.entries) { themeOption ->
+                        val isSelected = vipColorTheme == themeOption
+                        Surface(
+                            onClick = {
+                                if (isPremium || themeOption == VipColorTheme.TEAL_MOSS) {
+                                    vm.setVipTheme(themeOption)
+                                } else {
+                                    onOpenPremium()
+                                }
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (isSelected) GoldVip.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            border = BorderStroke(
+                                if (isSelected) 2.dp else 1.dp,
+                                if (isSelected) GoldVip else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier.bounceClick(minScale = 0.94f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = Color(android.graphics.Color.parseColor(themeOption.hexColor)),
+                                    modifier = Modifier.size(22.dp),
+                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                                ) {}
+                                Text(
+                                    themeOption.title,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) GoldVip else MaterialTheme.colorScheme.onSurface
+                                )
+                                if (!isPremium && themeOption != VipColorTheme.TEAL_MOSS) {
+                                    Icon(Icons.Rounded.Lock, null, tint = GoldVip, modifier = Modifier.size(13.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // بخش ۴: اندازه فونت و متون
         SettingsSection(title = "اندازه قلم و متون") {
             Row(
                 modifier = Modifier
@@ -332,7 +389,17 @@ fun SettingsScreen(
         }
 
         // بخش ۵: ابزارهای مالی و محاسباتی
-        SettingsSection(title = "ابزارهای هوشمند مالی") {
+        SettingsSection(title = "ابزارهای هوشمند مالی و ویجت") {
+            SettingsActionRow(
+                title = "ویجت هوشمند صفحه اصلی گوشی 📱",
+                subtitle = "مشاهده زنده سررسید اقساط و روزشمار روی صفحه اصلی",
+                icon = Icons.Rounded.Widgets,
+                locked = false,
+                onClick = { showWidgetGuideDialog = true }
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+
             SettingsActionRow(
                 title = "ماشین‌حساب جامع اقساط و سود وام 🧮",
                 subtitle = "محاسبه وام‌های ۴٪، ۱۸٪، ۲۳٪ و نرخ‌های مصوب بانکی",
@@ -345,9 +412,9 @@ fun SettingsScreen(
         // بخش ۶: مدیریت داده‌ها و فایل‌ها
         SettingsSection(title = "مدیریت داده‌ها و پشتیبان") {
             SettingsActionRow(
-                title = "خروجی کامل اکسل (CSV)",
-                subtitle = "تهیه فایل اکسل از کلیه اقساط و وضعیت‌ها",
-                icon = Icons.Rounded.TableChart,
+                title = "خروجی و گزارش‌گیری رسمی (PDF و اکسل)",
+                subtitle = "تهیه گزارش تفکیک‌شده PDF مصور و اکسل با فیلتر بازه زمانی",
+                icon = Icons.Rounded.PictureAsPdf,
                 locked = !isPremium,
                 onClick = { if (isPremium) onExportExcel() else onOpenPremium() }
             )
@@ -400,8 +467,8 @@ fun SettingsScreen(
                     }
                 }
                 Column(Modifier.weight(1f)) {
-                    Text("ارتقا به نسخه طلایی VIP 👑", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
-                    Text("خروجی اکسل، بک‌آپ ابری و امکانات نامحدود", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("ارتقا به نسخه طلایی (⭐ VIP)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
+                    Text("گزارش‌گیری PDF و اکسل، هوش مالی و امکانات نامحدود", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Icon(Icons.Rounded.ChevronLeft, null, tint = GoldVip)
             }
@@ -411,7 +478,7 @@ fun SettingsScreen(
         SettingsSection(title = "درباره و به‌روزرسانی") {
             SettingsActionRow(
                 title = "بررسی به‌روزرسانی در مایکت 🔄",
-                subtitle = "بررسی و دریافت نسخه جدید بدون خروج از برنامه",
+                subtitle = "بررسی و دریافت آخرین نسخه قسط‌یار",
                 icon = Icons.Rounded.Update,
                 locked = false,
                 onClick = {
@@ -458,6 +525,13 @@ fun SettingsScreen(
         )
     }
 
+    // دیالوگ راهنما و افزودن ویجت صفحه اصلی
+    if (showWidgetGuideDialog) {
+        WidgetGuideDialog(
+            onDismiss = { showWidgetGuideDialog = false }
+        )
+    }
+
     // دیالوگ افزودن پروفایل جدید
     if (showAddProfileDialog) {
         AddProfileDialog(
@@ -471,26 +545,14 @@ fun SettingsScreen(
 
     // دیالوگ تایید حذف پروفایل
     profileToDelete?.let { profile ->
-        AlertDialog(
-            onDismissRequest = { profileToDelete = null },
-            title = { Text("حذف حساب «${profile.name}»") },
-            text = { Text("آیا مطمئنید؟ با حذف این حساب، کلیه اقساط، چک‌ها و دخل‌وخرج ثبت‌شده در این حساب حذف خواهند شد.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        vm.deleteProfile(profile)
-                        profileToDelete = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Coral)
-                ) {
-                    Text("حذف حساب و اطلاعات", color = Color.White)
-                }
+        com.iliyateam.ghestyar.ui.components.ConfirmDeleteDialog(
+            title = "حذف حساب کاربری «${profile.name}»",
+            message = "آیا مطمئنید؟ با حذف این حساب، کلیه اقساط، چک‌ها، قلک‌ها و دخل‌وخرج ثبت‌شده در این حساب حذف خواهند شد.",
+            onConfirm = {
+                vm.deleteProfile(profile)
+                profileToDelete = null
             },
-            dismissButton = {
-                OutlinedButton(onClick = { profileToDelete = null }) {
-                    Text("انصراف")
-                }
-            }
+            onDismiss = { profileToDelete = null }
         )
     }
 }
@@ -681,13 +743,126 @@ private fun SettingsActionRow(
             Icon(icon, null, tint = Moss, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-                    if (locked) Text("🔒", fontSize = 10.sp)
+                    if (locked) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = GoldVip.copy(alpha = 0.16f),
+                            border = BorderStroke(0.7.dp, GoldVip.copy(alpha = 0.4f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Icon(Icons.Rounded.Star, null, tint = GoldVip, modifier = Modifier.size(11.dp))
+                                Text("VIP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                            }
+                        }
+                    }
                 }
                 Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.Rounded.ChevronLeft, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         }
     }
+}
+
+/**
+ * دیالوگ پیش‌نمایش زنده و راهنمای افزودن ویجت به صفحه اصلی
+ */
+@Composable
+private fun WidgetGuideDialog(
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("📱", fontSize = 20.sp)
+                Text("ویجت هوشمند صفحه اصلی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    "با قرار دادن ویجت قسط‌یار روی صفحه اصلی گوشی، همیشه از نزدیک‌ترین سررسید اقساط و تعهدات ماهانه باخبر باشید.",
+                    fontSize = 11.5.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // شبیه‌سازی زنده ویجت
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFF0F2628),
+                    border = BorderStroke(1.dp, Color(0xFF34D399).copy(alpha = 0.4f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("قسط‌یار • سررسید بعدی", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFA7F3D0))
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = Color(0x33F59E0B)
+                            ) {
+                                Text("۳ روز مانده", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFBBF24), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                            }
+                        }
+
+                        Text("وام خرید مسکن", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("۳٬۵۰۰٬۰۰۰ تومان", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF34D399))
+
+                        HorizontalDivider(color = Color(0x22FFFFFF))
+
+                        Text("تعهد این ماه: ۷٬۲۰۰٬۰۰۰ تومان (۲ قسط فعال)", fontSize = 10.sp, color = Color(0xFF9CA3AF))
+                    }
+                }
+
+                // راهنمای گام به گام
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("نحوه فعال‌سازی روی گوشی:", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("۱. انگشت خود را روی فضای خالی صفحه اصلی گوشی نگه دارید.", fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("۲. گزینه «ویجت‌ها / Widgets» را انتخاب کنید.", fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("۳. «قسط‌یار» را پیدا کرده و به صفحه بکشید.", fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        val appWidgetManager = android.appwidget.AppWidgetManager.getInstance(context)
+                        val myProvider = android.content.ComponentName(context, GhestYarWidgetProvider::class.java)
+                        if (appWidgetManager.isRequestPinAppWidgetSupported) {
+                            appWidgetManager.requestPinAppWidget(myProvider, null, null)
+                        } else {
+                            android.widget.Toast.makeText(context, "لطفاً از منوی ویجت‌های لانچر گوشی اقدام کنید", android.widget.Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        android.widget.Toast.makeText(context, "لطفاً از منوی ویجت‌های لانچر گوشی اقدام کنید", android.widget.Toast.LENGTH_LONG).show()
+                    }
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Moss)
+            ) {
+                Text("افزودن خودکار به صفحه اصلی 📱", fontWeight = FontWeight.Bold, color = Color.White)
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) { Text("متوجه شدم") }
+        }
+    )
 }

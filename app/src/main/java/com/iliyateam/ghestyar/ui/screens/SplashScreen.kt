@@ -2,6 +2,7 @@
 package com.iliyateam.ghestyar.ui.screens
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,9 +15,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.iliyateam.ghestyar.ui.components.AppLogo
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.components.shimmerBrush
 import com.iliyateam.ghestyar.ui.theme.GoldVip
@@ -123,24 +126,12 @@ fun SplashScreen(onFinish: () -> Unit) {
                         .background(MintSoft)
                 )
 
-                // کادر اصلی لوگو M3 Expressive 28dp
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = Moss,
+                // لوگوی اصلی قسط‌یار با وکتور بومی و پرسرعت
+                AppLogo(
                     modifier = Modifier
-                        .size(92.dp)
-                        .shimmerBrush(durationMillis = 1600),
-                    shadowElevation = 8.dp
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            "ق",
-                            color = Color.White,
-                            fontSize = 48.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+                        .size(118.dp)
+                        .bounceClick(minScale = 0.95f)
+                )
             }
 
             Spacer(Modifier.height(18.dp))

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -69,7 +70,7 @@ fun InstallmentReceiptCardDialog(
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Surface(shape = CircleShape, color = Moss.copy(alpha = 0.14f), modifier = Modifier.size(36.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Rounded.ReceiptLong, null, tint = Moss, modifier = Modifier.size(20.dp))
+                            Icon(Icons.AutoMirrored.Rounded.ReceiptLong, null, tint = Moss, modifier = Modifier.size(20.dp))
                         }
                     }
                     Text("کارت رسید پرداخت", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
@@ -149,6 +150,9 @@ fun InstallmentReceiptCardDialog(
                         // ردیف‌های اطلاعات رسید
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             ReceiptRow(label = "عنوان قسط:", value = item.title)
+                            if (item.destination.isNotBlank()) {
+                                ReceiptRow(label = "مقصد / بانک:", value = item.destination)
+                            }
                             ReceiptRow(label = "نوبت قسط:", value = "قسط ${item.paidSessions.faDigits()} از ${item.totalSessions.faDigits()}")
                             ReceiptRow(label = "تاریخ ثبت:", value = todayJalali)
                             ReceiptRow(label = "سررسید بعدی:", value = dueJalali)

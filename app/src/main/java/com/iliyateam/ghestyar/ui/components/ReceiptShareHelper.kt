@@ -16,17 +16,20 @@ object ReceiptShareHelper {
         val todayJalali = LocalDate.now().formatJalali()
         val dueJalali = LocalDate.ofEpochDay(item.dueEpochDay).formatJalali()
 
-        val text = """
-            🧾 رسید پرداخت قسط در قسط‌یار
-            ━━━━━━━━━━━━━━━━━
-            📌 عنوان: ${item.title}
-            💵 مبلغ هر قسط: ${item.amount.money()} تومان
-            📊 وضعیت: قسط ${(item.paidSessions).faDigits()} از ${item.totalSessions.faDigits()} تسویه شد ✅
-            📅 تاریخ ثبت پرداخت: $todayJalali
-            ⏰ سررسید بعدی: $dueJalali
-            ━━━━━━━━━━━━━━━━━
-            📱 ثبت و پیگیری شده توسط اپلیکیشن «قسط‌یار»
-        """.trimIndent()
+        val text = buildString {
+            appendLine("🧾 رسید پرداخت قسط در قسط‌یار")
+            appendLine("━━━━━━━━━━━━━━━━━")
+            appendLine("📌 عنوان: ${item.title}")
+            if (item.destination.isNotBlank()) {
+                appendLine("🏦 مقصد پرداخت: ${item.destination}")
+            }
+            appendLine("💵 مبلغ هر قسط: ${item.amount.money()} تومان")
+            appendLine("📊 وضعیت: قسط ${(item.paidSessions).faDigits()} از ${item.totalSessions.faDigits()} تسویه شد ✅")
+            appendLine("📅 تاریخ ثبت پرداخت: $todayJalali")
+            appendLine("⏰ سررسید بعدی: $dueJalali")
+            appendLine("━━━━━━━━━━━━━━━━━")
+            append("📱 ثبت و پیگیری شده توسط اپلیکیشن «قسط‌یار»")
+        }
 
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND

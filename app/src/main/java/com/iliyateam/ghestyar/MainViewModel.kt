@@ -18,6 +18,17 @@ enum class AppThemeMode {
     SYSTEM, LIGHT, DARK
 }
 
+enum class VipColorTheme(
+    val title: String,
+    val hexColor: String
+) {
+    TEAL_MOSS("سبزآبی کلاسیک", "#006A6E"),
+    OBSIDIAN_GOLD("طلایی اشرافی (Obsidian Gold)", "#D4AF37"),
+    EMERALD_LUXURY("زمرد سلطنتی (Royal Emerald)", "#059669"),
+    ROYAL_AMETHYST("ارغوانی اشرافی (Deep Amethyst)", "#7C3AED"),
+    MIDNIGHT_SAPPHIRE("یاقوت کبود (Midnight Sapphire)", "#0284C7")
+}
+
 enum class AppFontScale(val title: String, val scale: Float) {
     SMALL("کوچک", 0.90f),
     NORMAL("استاندارد", 1.0f),
@@ -49,8 +60,11 @@ data class FinancialStats(
 data class CashflowSummary(
     val totalIncome: Long = 0L,
     val totalExpense: Long = 0L,
+    val thisMonthInstallments: Long = 0L,
     val netBalance: Long = 0L,
-    val remainingAfterInstallments: Long = 0L
+    val remainingAfterInstallments: Long = 0L,
+    val recurringMonthlyIncome: Long = 0L,
+    val recurringMonthlyExpense: Long = 0L
 )
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
@@ -60,6 +74,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val savingsGoalDao = db.savingsGoalDao()
     private val chequeOrDebtDao = db.chequeOrDebtDao()
     private val userProfileDao = db.userProfileDao()
+    private val loanPoolDao = db.loanPoolDao()
 
     private val prefs = app.getSharedPreferences("ghestyar_settings", Context.MODE_PRIVATE)
 
@@ -68,6 +83,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val activeProfileId = MutableStateFlow(prefs.getLong("active_profile_id", 1L))
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val loanPoolsWithMembers: StateFlow<List<LoanPoolWithMembers>> = activeProfileId
+        .flatMapLatest { pId -> loanPoolDao.getPoolsWithMembers(pId) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val activeProfile: StateFlow<UserProfile> = combine(
         allProfiles,
@@ -160,6 +180,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         list.filter { it.profileId == pId }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val all: StateFlow<List<Installment>> = combine(
+        active,
+        history
+    ) { act, hist ->
+        act + hist
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     val searchQuery = MutableStateFlow("")
     val selectedCategoryFilter = MutableStateFlow<String?>(null)
     val selectedUrgencyFilter = MutableStateFlow(UrgencyFilter.ALL)
@@ -177,6 +204,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         list.filter { item ->
             val matchQuery = query.isBlank() ||
                     item.title.contains(query, ignoreCase = true) ||
+                    item.destination.contains(query, ignoreCase = true) ||
                     item.note.contains(query, ignoreCase = true)
 
             val matchCategory = category == null || item.category == category
@@ -228,8 +256,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         transactions,
         active
     ) { txList, activeInstallments ->
-        val currentMonth = JalaliDate.today().jm
-        val currentYear = JalaliDate.today().jy
+        val today = JalaliDate.today()
+        val currentMonth = today.jm
+        val currentYear = today.jy
 
         val thisMonthTx = txList.filter {
             val jDate = LocalDate.ofEpochDay(it.epochDay).toJalali()
@@ -240,18 +269,23 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val expense = thisMonthTx.filter { !it.isIncome }.sumOf { it.amount }
         val net = income - expense
 
-        val today = LocalDate.now().toEpochDay()
-        val monthInstallments = activeInstallments
-            .filter { it.dueEpochDay <= today + 30 }
-            .sumOf { it.amount }
+        // تعهدات اقساط ماه جاری: مجموع مبالغ ماهانه تمام اقساط فعال
+        val monthInstallments = activeInstallments.sumOf { it.amount }
 
         val remainingAfterGhest = net - monthInstallments
+
+        // درآمدهای تکرارشونده و ثابت ماهانه در پروفایل فعال
+        val recurringIncome = txList.filter { it.isIncome && it.isRecurring }.sumOf { it.amount }
+        val recurringExpense = txList.filter { !it.isIncome && it.isRecurring }.sumOf { it.amount }
 
         CashflowSummary(
             totalIncome = income,
             totalExpense = expense,
+            thisMonthInstallments = monthInstallments,
             netBalance = net,
-            remainingAfterInstallments = remainingAfterGhest
+            remainingAfterInstallments = remainingAfterGhest,
+            recurringMonthlyIncome = recurringIncome,
+            recurringMonthlyExpense = recurringExpense
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CashflowSummary())
 
@@ -304,6 +338,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         AppThemeMode.valueOf(prefs.getString("theme_mode", AppThemeMode.SYSTEM.name) ?: AppThemeMode.SYSTEM.name)
     )
 
+    val vipColorTheme = MutableStateFlow(
+        try {
+            VipColorTheme.valueOf(prefs.getString("vip_color_theme", VipColorTheme.TEAL_MOSS.name) ?: VipColorTheme.TEAL_MOSS.name)
+        } catch (_: Exception) {
+            VipColorTheme.TEAL_MOSS
+        }
+    )
+
     val fontScale = MutableStateFlow(
         try {
             AppFontScale.valueOf(prefs.getString("font_scale", AppFontScale.NORMAL.name) ?: AppFontScale.NORMAL.name)
@@ -320,6 +362,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun setTheme(mode: AppThemeMode) {
         themeMode.value = mode
         prefs.edit().putString("theme_mode", mode.name).apply()
+    }
+
+    fun setVipTheme(theme: VipColorTheme) {
+        vipColorTheme.value = theme
+        prefs.edit().putString("vip_color_theme", theme.name).apply()
     }
 
     fun setFontScale(scale: AppFontScale) {
@@ -355,7 +402,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun add(
         title: String, amount: Long, due: JalaliDate, sessions: Int,
-        colorIndex: Int, category: String, remind: Boolean, note: String
+        colorIndex: Int, category: String, remind: Boolean, note: String,
+        destination: String = ""
     ) {
         viewModelScope.launch {
             val pId = activeProfileId.value
@@ -370,6 +418,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 category = category,
                 remind = remind,
                 note = note.trim(),
+                destination = destination.trim(),
                 profileId = pId
             )
             val id = installmentDao.insert(item)
@@ -379,7 +428,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun update(
         item: Installment, title: String, amount: Long, due: JalaliDate,
-        sessions: Int, colorIndex: Int, category: String, remind: Boolean, note: String
+        sessions: Int, colorIndex: Int, category: String, remind: Boolean, note: String,
+        destination: String = ""
     ) {
         viewModelScope.launch {
             val pName = activeProfile.value.name
@@ -392,7 +442,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 colorIndex = colorIndex,
                 category = category,
                 remind = remind,
-                note = note.trim()
+                note = note.trim(),
+                destination = destination.trim()
             )
             installmentDao.update(updated)
             if (remind) ReminderScheduler.schedule(getApplication(), updated, pName)
@@ -409,7 +460,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     .plusMonths(1).toLocalDate()
                 val updated = item.copy(
                     paidSessions = item.paidSessions + 1,
-                    startEpochDay = today.toEpochDay(),
                     dueEpochDay = nextDue.toEpochDay(),
                     isPaid = false,
                     paidAtEpochDay = today.toEpochDay()
@@ -425,19 +475,29 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 installmentDao.update(updated)
                 ReminderScheduler.cancel(getApplication(), item)
             }
+            com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(getApplication())
         }
     }
 
     fun unmarkPaid(item: Installment) {
         viewModelScope.launch {
             val pName = activeProfile.value.name
+            if (item.paidSessions <= 0) return@launch
+
+            val prevDue = if (!item.isPaid && item.paidSessions > 0) {
+                LocalDate.ofEpochDay(item.dueEpochDay).toJalali().minusMonths(1).toLocalDate().toEpochDay()
+            } else {
+                item.dueEpochDay
+            }
             val updated = item.copy(
                 isPaid = false,
                 paidSessions = (item.paidSessions - 1).coerceAtLeast(0),
+                dueEpochDay = prevDue,
                 paidAtEpochDay = null
             )
             installmentDao.update(updated)
             if (updated.remind) ReminderScheduler.schedule(getApplication(), updated, pName)
+            com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(getApplication())
         }
     }
 
@@ -448,8 +508,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // ─── عملیات تراکنش‌ها (دخل و خرج) ───
-    fun addTransaction(title: String, amount: Long, isIncome: Boolean, category: String, epochDay: Long, note: String = "") {
+    fun addTransaction(
+        title: String,
+        amount: Long,
+        isIncome: Boolean,
+        category: String,
+        epochDay: Long,
+        note: String = "",
+        isRecurring: Boolean = false
+    ) {
         viewModelScope.launch {
             transactionDao.insert(
                 Transaction(
@@ -459,7 +526,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     category = category,
                     epochDay = epochDay,
                     note = note.trim(),
-                    profileId = activeProfileId.value
+                    profileId = activeProfileId.value,
+                    isRecurring = isRecurring
                 )
             )
         }
@@ -471,6 +539,31 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val mapped = list.map { it.copy(profileId = pId) }
             val insertedIds = transactionDao.insertAll(mapped)
             onComplete(insertedIds.size)
+        }
+    }
+
+    fun updateTransaction(
+        tx: Transaction,
+        title: String,
+        amount: Long,
+        isIncome: Boolean,
+        category: String,
+        epochDay: Long,
+        note: String = "",
+        isRecurring: Boolean = false
+    ) {
+        viewModelScope.launch {
+            transactionDao.update(
+                tx.copy(
+                    title = title.trim(),
+                    amount = amount,
+                    isIncome = isIncome,
+                    category = category,
+                    epochDay = epochDay,
+                    note = note.trim(),
+                    isRecurring = isRecurring
+                )
+            )
         }
     }
 
@@ -490,6 +583,29 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     emoji = emoji,
                     note = note.trim(),
                     profileId = activeProfileId.value
+                )
+            )
+        }
+    }
+
+    fun updateSavingsGoal(
+        goal: SavingsGoal,
+        title: String,
+        targetAmount: Long,
+        currentAmount: Long,
+        due: JalaliDate,
+        emoji: String,
+        note: String = ""
+    ) {
+        viewModelScope.launch {
+            savingsGoalDao.update(
+                goal.copy(
+                    title = title.trim(),
+                    targetAmount = targetAmount,
+                    currentAmount = currentAmount,
+                    targetEpochDay = due.toLocalDate().toEpochDay(),
+                    emoji = emoji,
+                    note = note.trim()
                 )
             )
         }
@@ -526,6 +642,35 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun updateChequeOrDebt(
+        item: ChequeOrDebt,
+        title: String,
+        personName: String,
+        amount: Long,
+        isCheque: Boolean,
+        isReceivable: Boolean,
+        due: JalaliDate,
+        chequeNumber: String = "",
+        bankName: String = "",
+        note: String = ""
+    ) {
+        viewModelScope.launch {
+            chequeOrDebtDao.update(
+                item.copy(
+                    title = title.trim(),
+                    personName = personName.trim(),
+                    amount = amount,
+                    isCheque = isCheque,
+                    isReceivable = isReceivable,
+                    dueEpochDay = due.toLocalDate().toEpochDay(),
+                    chequeNumber = chequeNumber.trim(),
+                    bankName = bankName.trim(),
+                    note = note.trim()
+                )
+            )
+        }
+    }
+
     fun toggleChequeCleared(item: ChequeOrDebt) {
         viewModelScope.launch {
             chequeOrDebtDao.update(item.copy(isCleared = !item.isCleared))
@@ -534,6 +679,153 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun deleteChequeOrDebt(item: ChequeOrDebt) {
         viewModelScope.launch { chequeOrDebtDao.delete(item) }
+    }
+
+    // ─── مدیریت صندوق‌های وام و قرعه‌کشی خانوادگی ───
+    fun createLoanPool(
+        title: String,
+        monthlyAmount: Long,
+        memberNames: List<String>,
+        startEpochDay: Long,
+        note: String = ""
+    ) {
+        viewModelScope.launch {
+            val total = memberNames.size.coerceAtLeast(2)
+            val pool = LoanPool(
+                title = title.trim(),
+                monthlyAmount = monthlyAmount,
+                totalMembers = total,
+                startEpochDay = startEpochDay,
+                winnerPayout = monthlyAmount * total,
+                currentRound = 1,
+                note = note.trim(),
+                profileId = activeProfileId.value
+            )
+            val poolId = loanPoolDao.insertPool(pool)
+            val members = memberNames.mapIndexed { idx, name ->
+                LoanPoolMember(
+                    poolId = poolId,
+                    name = name.trim(),
+                    lotteryPosition = idx + 1,
+                    hasWon = false,
+                    wonMonth = 0,
+                    paidThisMonth = false
+                )
+            }
+            loanPoolDao.insertMembers(members)
+        }
+    }
+
+    fun toggleMemberPaidThisMonth(member: LoanPoolMember) {
+        viewModelScope.launch {
+            loanPoolDao.updateMember(member.copy(paidThisMonth = !member.paidThisMonth))
+        }
+    }
+
+    fun setLotteryOrder(poolId: Long, orderedMembers: List<LoanPoolMember>) {
+        viewModelScope.launch {
+            val updated = orderedMembers.mapIndexed { idx, m ->
+                m.copy(lotteryPosition = idx + 1)
+            }
+            loanPoolDao.updateMembers(updated)
+        }
+    }
+
+    fun markPoolWinner(pool: LoanPool, member: LoanPoolMember, month: Int) {
+        viewModelScope.launch {
+            loanPoolDao.updateMember(member.copy(hasWon = true, wonMonth = month))
+            if (month >= pool.currentRound) {
+                loanPoolDao.updatePool(pool.copy(currentRound = (month + 1).coerceAtMost(pool.totalMembers)))
+            }
+        }
+    }
+
+    fun advancePoolRoundAndResetPayments(pool: LoanPool, currentMembers: List<LoanPoolMember>) {
+        viewModelScope.launch {
+            val nextRound = (pool.currentRound + 1).coerceAtMost(pool.totalMembers)
+            loanPoolDao.updatePool(pool.copy(currentRound = nextRound))
+            val resetMembers = currentMembers.map { it.copy(paidThisMonth = false) }
+            loanPoolDao.updateMembers(resetMembers)
+        }
+    }
+
+    fun updateLoanPool(pool: LoanPool, title: String, monthlyAmount: Long, note: String = "") {
+        viewModelScope.launch {
+            loanPoolDao.updatePool(
+                pool.copy(
+                    title = title.trim(),
+                    monthlyAmount = monthlyAmount,
+                    winnerPayout = monthlyAmount * pool.totalMembers,
+                    note = note.trim()
+                )
+            )
+        }
+    }
+
+    fun deleteLoanPool(pool: LoanPool) {
+        viewModelScope.launch {
+            loanPoolDao.deletePool(pool)
+        }
+    }
+
+    suspend fun getFullBackupData(): com.iliyateam.ghestyar.util.FullBackupData {
+        return com.iliyateam.ghestyar.util.FullBackupData(
+            version = 4,
+            timestamp = System.currentTimeMillis(),
+            installments = installmentDao.getAll(),
+            transactions = transactionDao.getAll(),
+            savingsGoals = savingsGoalDao.getAll(),
+            chequesAndDebts = chequeOrDebtDao.getAll(),
+            userProfiles = userProfileDao.getAll(),
+            loanPools = loanPoolDao.getAllPools(),
+            loanPoolMembers = loanPoolDao.getAllMembers()
+        )
+    }
+
+    fun restoreFullBackup(data: com.iliyateam.ghestyar.util.FullBackupData, onComplete: (Int, Int, Int, Int) -> Unit) {
+        viewModelScope.launch {
+            var instCount = 0
+            var txCount = 0
+            var goalCount = 0
+            var chequeCount = 0
+
+            if (data.userProfiles.isNotEmpty()) {
+                userProfileDao.insertAll(data.userProfiles)
+            }
+
+            if (data.installments.isNotEmpty()) {
+                installmentDao.insertAll(data.installments)
+                instCount = data.installments.size
+                val pName = activeProfile.value.name
+                data.installments.filter { !it.isPaid && it.remind }.forEach {
+                    ReminderScheduler.schedule(getApplication(), it, pName)
+                }
+            }
+
+            if (data.transactions.isNotEmpty()) {
+                transactionDao.insertAll(data.transactions)
+                txCount = data.transactions.size
+            }
+
+            if (data.savingsGoals.isNotEmpty()) {
+                savingsGoalDao.insertAll(data.savingsGoals)
+                goalCount = data.savingsGoals.size
+            }
+
+            if (data.chequesAndDebts.isNotEmpty()) {
+                chequeOrDebtDao.insertAll(data.chequesAndDebts)
+                chequeCount = data.chequesAndDebts.size
+            }
+
+            if (data.loanPools.isNotEmpty()) {
+                loanPoolDao.insertAllPools(data.loanPools)
+            }
+            if (data.loanPoolMembers.isNotEmpty()) {
+                loanPoolDao.insertAllMembers(data.loanPoolMembers)
+            }
+
+            onComplete(instCount, txCount, goalCount, chequeCount)
+        }
     }
 
     fun restoreBackup(items: List<Installment>, onComplete: (Int) -> Unit) {

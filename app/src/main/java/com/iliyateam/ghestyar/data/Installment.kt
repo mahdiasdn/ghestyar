@@ -19,6 +19,7 @@ data class Installment(
     val category: String = "bank",    // دسته‌بندی قسط
     val remind: Boolean = true,
     val note: String = "",
+    val destination: String = "",     // مقصد پرداخت (بانک، سرویس‌های BNPL مثل اسنپ‌پی، دیجی‌پی، تارا و...)
     val profileId: Long = 1L
 ) {
     /** مجموع کل مبلغ وام/قسط */
@@ -58,6 +59,29 @@ object InstallmentCategories {
 
     fun get(id: String): InstallmentCategory =
         list.firstOrNull { it.id == id } ?: list.last()
+}
+
+object InstallmentProviders {
+    /** پیشنهادات پرکاربرد BNPL، بانک‌ها و خدمات اقساطی */
+    val popularSuggestions = listOf(
+        "اسنپ‌پی",
+        "دیجی‌پی",
+        "تارا",
+        "تالی",
+        "بلوبانک",
+        "بانک رسالت",
+        "بانک ملی",
+        "بانک ملت",
+        "بانک صادرات",
+        "بانک مهر ایران",
+        "بانک پاسارگاد",
+        "بانک تجارت",
+        "بانک سپه",
+        "لندو",
+        "ازکی‌وام",
+        "صندوق خانگی",
+        "شخصی"
+    )
 }
 
 @Dao

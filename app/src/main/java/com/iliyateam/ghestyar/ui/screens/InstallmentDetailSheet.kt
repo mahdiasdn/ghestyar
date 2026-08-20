@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
@@ -41,6 +42,7 @@ fun InstallmentDetailSheet(
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
     onPayCurrent: () -> Unit,
+    onUnmarkPaid: () -> Unit = {},
     onDelete: () -> Unit
 ) {
     val category = InstallmentCategories.get(item.category)
@@ -52,6 +54,7 @@ fun InstallmentDetailSheet(
     val remainingSessions = (item.totalSessions - item.paidSessions).coerceAtLeast(0)
 
     var showReceiptCard by remember { mutableStateOf(false) }
+    var showConfirmDelete by remember { mutableStateOf(false) }
     val isDark = isSystemInDarkTheme()
     val sheetState = rememberModalBottomSheetState()
 
@@ -105,11 +108,31 @@ fun InstallmentDetailSheet(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Text(
-                            category.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                category.title,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (item.destination.isNotBlank()) {
+                                Text("•", fontSize = 11.sp, color = MaterialTheme.colorScheme.outlineVariant)
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = if (isDark) MaterialTheme.colorScheme.surfaceContainerHighest else MintSoft
+                                ) {
+                                    Text(
+                                        "🏦 ${item.destination}",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = if (isDark) MossLight else Moss,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -224,6 +247,7 @@ fun InstallmentDetailSheet(
                 for (s in 1..item.totalSessions) {
                     val isPaid = s <= item.paidSessions
                     val isCurrent = s == item.paidSessions + 1
+                    val isLastPaid = s == item.paidSessions && item.paidSessions > 0
                     val sessionDue = start.plusMonths((s - 1).toLong())
 
                     Surface(
@@ -248,6 +272,7 @@ fun InstallmentDetailSheet(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(
+                                modifier = Modifier.weight(1f),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
@@ -270,22 +295,50 @@ fun InstallmentDetailSheet(
                                     }
                                 }
 
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         "قسط ${s.faDigits()} — ${sessionDue.formatJalali()}",
                                         fontSize = 12.sp,
                                         fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isCurrent) (if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else MossDeep) else MaterialTheme.colorScheme.onSurface
+                                        color = if (isCurrent) (if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else MossDeep) else MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1
                                     )
                                 }
                             }
 
-                            Text(
-                                "${item.amount.money()} ت",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isCurrent) Moss else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (isLastPaid) {
+                                    Surface(
+                                        onClick = {
+                                            onUnmarkPaid()
+                                            onDismiss()
+                                        },
+                                        shape = RoundedCornerShape(50),
+                                        color = Coral.copy(alpha = 0.14f),
+                                        border = BorderStroke(0.8.dp, Coral.copy(alpha = 0.4f)),
+                                        modifier = Modifier.bounceClick(minScale = 0.92f)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                        ) {
+                                            Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, tint = Coral, modifier = Modifier.size(12.dp))
+                                            Text("لغو پرداخت", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Coral)
+                                        }
+                                    }
+                                }
+
+                                Text(
+                                    "${item.amount.money()} ت",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isCurrent) Moss else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
@@ -309,42 +362,75 @@ fun InstallmentDetailSheet(
 
             Spacer(Modifier.height(4.dp))
 
-            // ۶. دکمه‌های عملیات ۲۸dp مطابق کیت Expressive (عکس ۳ و ۴)
+            // ۶. دکمه‌های عملیات ۲۸dp
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(
-                    onClick = {
-                        onPayCurrent()
-                        onDismiss()
-                    },
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Moss),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(54.dp)
-                        .bounceClick(minScale = 0.96f)
-                ) {
-                    Text("پرداخت این قسط ✅", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                if (item.paidSessions < item.totalSessions) {
+                    Button(
+                        onClick = {
+                            onPayCurrent()
+                            onDismiss()
+                        },
+                        shape = RoundedCornerShape(24.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Moss),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .bounceClick(minScale = 0.96f)
+                    ) {
+                        Text("پرداخت این قسط ✅", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
+                    }
+                }
+
+                if (item.paidSessions > 0) {
+                    OutlinedButton(
+                        onClick = {
+                            onUnmarkPaid()
+                            onDismiss()
+                        },
+                        shape = RoundedCornerShape(24.dp),
+                        border = BorderStroke(1.dp, Coral.copy(alpha = 0.6f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Coral),
+                        modifier = Modifier
+                            .weight(if (item.paidSessions >= item.totalSessions) 1f else 0.9f)
+                            .height(52.dp)
+                            .bounceClick(minScale = 0.96f)
+                    ) {
+                        Icon(Icons.AutoMirrored.Rounded.Undo, null, modifier = Modifier.size(15.dp), tint = Coral)
+                        Spacer(Modifier.width(4.dp))
+                        Text("بازگردانی پرداخت ↩️", color = Coral, fontWeight = FontWeight.Bold, fontSize = 11.5.sp)
+                    }
                 }
 
                 OutlinedButton(
-                    onClick = {
-                        onDelete()
-                        onDismiss()
-                    },
-                    shape = RoundedCornerShape(28.dp),
+                    onClick = { showConfirmDelete = true },
+                    shape = RoundedCornerShape(24.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Coral),
-                    border = BorderStroke(1.dp, Coral.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, Coral.copy(alpha = 0.4f)),
                     modifier = Modifier
-                        .height(54.dp)
-                        .bounceClick(minScale = 0.94f)
+                        .size(52.dp)
+                        .bounceClick(minScale = 0.94f),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Icon(Icons.Outlined.Delete, "حذف", tint = Coral)
+                    Icon(Icons.Outlined.Delete, "حذف", tint = Coral, modifier = Modifier.size(20.dp))
                 }
             }
         }
+    }
+
+    if (showConfirmDelete) {
+        com.iliyateam.ghestyar.ui.components.ConfirmDeleteDialog(
+            title = "حذف قسط «${item.title}»",
+            message = "آیا از حذف این قسط و سوابق آن اطمینان دارید؟ این عملیات غیرقابل بازگشت است.",
+            onConfirm = {
+                showConfirmDelete = false
+                onDelete()
+                onDismiss()
+            },
+            onDismiss = { showConfirmDelete = false }
+        )
     }
 
     if (showReceiptCard) {

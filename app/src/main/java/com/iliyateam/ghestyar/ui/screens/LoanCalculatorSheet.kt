@@ -26,8 +26,7 @@ import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.theme.Coral
 import com.iliyateam.ghestyar.ui.theme.GoldVip
 import com.iliyateam.ghestyar.ui.theme.Moss
-import com.iliyateam.ghestyar.util.faDigits
-import com.iliyateam.ghestyar.util.money
+import com.iliyateam.ghestyar.util.*
 import kotlin.math.pow
 
 data class LoanRatePreset(
@@ -110,13 +109,44 @@ fun LoanCalculatorSheet(
             // ۱. مبلغ کل وام
             OutlinedTextField(
                 value = if (loanAmountDigits.isEmpty()) "" else principal.money(),
-                onValueChange = { v -> loanAmountDigits = v.filter { it.isDigit() }.take(14) },
+                onValueChange = { v -> loanAmountDigits = v.cleanNumericDigits(14) },
                 label = { Text("مبلغ کل وام درخواستی (تومان)") },
+                trailingIcon = {
+                    if (loanAmountDigits.isNotEmpty()) {
+                        IconButton(onClick = { loanAmountDigits = "" }) {
+                            Icon(Icons.Rounded.Close, "پاک کردن", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                        }
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // نمایش زنده مبلغ به حروف
+            if (principal > 0L) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Moss.copy(alpha = 0.09f),
+                    border = BorderStroke(1.dp, Moss.copy(alpha = 0.25f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text("✍️", fontSize = 12.sp)
+                        Text(
+                            "معادل: ${principal.toPersianWords("تومان")}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Moss
+                        )
+                    }
+                }
+            }
 
             // کلیدهای سریع مبلغ
             LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -216,12 +246,21 @@ fun LoanCalculatorSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("مبلغ هر قسط ماهانه:", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(
-                            "${calculation.monthlyPayment.money()} تومان",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Moss
-                        )
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                "${calculation.monthlyPayment.money()} تومان",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Moss
+                            )
+                            if (calculation.monthlyPayment > 0) {
+                                Text(
+                                    calculation.monthlyPayment.toPersianWords("تومان"),
+                                    fontSize = 9.5.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
