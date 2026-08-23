@@ -80,6 +80,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ─── مدیریت پروفایل‌های چندگانه و ایزوله ───
     val allProfiles: StateFlow<List<UserProfile>> = userProfileDao.observeAll()
+        .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val activeProfileId = MutableStateFlow(prefs.getLong("active_profile_id", 1L))
@@ -87,6 +88,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val loanPoolsWithMembers: StateFlow<List<LoanPoolWithMembers>> = activeProfileId
         .flatMapLatest { pId -> loanPoolDao.getPoolsWithMembers(pId) }
+        .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val activeProfile: StateFlow<UserProfile> = combine(
@@ -167,14 +169,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ─── جریان‌های اقساط (کاملاً فیلتر و ایزوله بر اساس پروفایل فعال) ───
     val active: StateFlow<List<Installment>> = combine(
-        installmentDao.observeActive(),
+        installmentDao.observeActive().distinctUntilChanged(),
         activeProfileId
     ) { list, pId ->
         list.filter { it.profileId == pId }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val history: StateFlow<List<Installment>> = combine(
-        installmentDao.observeHistory(),
+        installmentDao.observeHistory().distinctUntilChanged(),
         activeProfileId
     ) { list, pId ->
         list.filter { it.profileId == pId }
@@ -222,7 +224,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ─── جریان‌های دخل و خرج (ایزوله بر اساس پروفایل) ───
     val transactions: StateFlow<List<Transaction>> = combine(
-        transactionDao.observeAll(),
+        transactionDao.observeAll().distinctUntilChanged(),
         activeProfileId
     ) { list, pId ->
         list.filter { it.profileId == pId }
@@ -230,7 +232,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ─── جریان‌های قلک و اهداف (ایزوله بر اساس پروفایل) ───
     val savingsGoals: StateFlow<List<SavingsGoal>> = combine(
-        savingsGoalDao.observeAll(),
+        savingsGoalDao.observeAll().distinctUntilChanged(),
         activeProfileId
     ) { list, pId ->
         list.filter { it.profileId == pId }
@@ -238,14 +240,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     // ─── جریان‌های چک و قرض (ایزوله بر اساس پروفایل) ───
     val pendingChequesAndDebts: StateFlow<List<ChequeOrDebt>> = combine(
-        chequeOrDebtDao.observePending(),
+        chequeOrDebtDao.observePending().distinctUntilChanged(),
         activeProfileId
     ) { list, pId ->
         list.filter { it.profileId == pId }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val clearedChequesAndDebts: StateFlow<List<ChequeOrDebt>> = combine(
-        chequeOrDebtDao.observeCleared(),
+        chequeOrDebtDao.observeCleared().distinctUntilChanged(),
         activeProfileId
     ) { list, pId ->
         list.filter { it.profileId == pId }
@@ -453,27 +455,31 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun markPaid(item: Installment) {
         viewModelScope.launch {
+            if (item.paidSessions >= item.totalSessions) return@launch
             val today = LocalDate.now()
             val pName = activeProfile.value.name
-            if (item.paidSessions + 1 < item.totalSessions) {
-                val nextDue = LocalDate.ofEpochDay(item.dueEpochDay).toJalali()
-                    .plusMonths(1).toLocalDate()
-                val updated = item.copy(
-                    paidSessions = item.paidSessions + 1,
-                    dueEpochDay = nextDue.toEpochDay(),
-                    isPaid = false,
-                    paidAtEpochDay = today.toEpochDay()
-                )
-                installmentDao.update(updated)
-                if (updated.remind) ReminderScheduler.schedule(getApplication(), updated, pName)
+            val newPaidSessions = item.paidSessions + 1
+            val isLast = newPaidSessions >= item.totalSessions
+
+            // محاسبه کاملاً قطعی و بدون انحراف موعد سررسید قسط بعدی بر اساس تاریخ شروع وام
+            val baseStart = LocalDate.ofEpochDay(item.startEpochDay).toJalali()
+            val nextDueEpoch = if (!isLast) {
+                baseStart.plusMonths(newPaidSessions).toLocalDate().toEpochDay()
             } else {
-                val updated = item.copy(
-                    isPaid = true,
-                    paidAtEpochDay = today.toEpochDay(),
-                    paidSessions = item.paidSessions + 1
-                )
-                installmentDao.update(updated)
+                item.dueEpochDay
+            }
+
+            val updated = item.copy(
+                paidSessions = newPaidSessions,
+                dueEpochDay = nextDueEpoch,
+                isPaid = isLast,
+                paidAtEpochDay = today.toEpochDay()
+            )
+            installmentDao.update(updated)
+            if (isLast) {
                 ReminderScheduler.cancel(getApplication(), item)
+            } else if (updated.remind) {
+                ReminderScheduler.schedule(getApplication(), updated, pName)
             }
             com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(getApplication())
         }
@@ -481,18 +487,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun unmarkPaid(item: Installment) {
         viewModelScope.launch {
-            val pName = activeProfile.value.name
             if (item.paidSessions <= 0) return@launch
+            val pName = activeProfile.value.name
+            val newPaidSessions = item.paidSessions - 1
 
-            val prevDue = if (!item.isPaid && item.paidSessions > 0) {
-                LocalDate.ofEpochDay(item.dueEpochDay).toJalali().minusMonths(1).toLocalDate().toEpochDay()
-            } else {
-                item.dueEpochDay
-            }
+            // محاسبه کاملاً قطعی و بدون انحراف موعد سررسید قسط قبلی بر اساس تاریخ شروع وام
+            val baseStart = LocalDate.ofEpochDay(item.startEpochDay).toJalali()
+            val prevDueEpoch = baseStart.plusMonths(newPaidSessions).toLocalDate().toEpochDay()
+
             val updated = item.copy(
                 isPaid = false,
-                paidSessions = (item.paidSessions - 1).coerceAtLeast(0),
-                dueEpochDay = prevDue,
+                paidSessions = newPaidSessions,
+                dueEpochDay = prevDueEpoch,
                 paidAtEpochDay = null
             )
             installmentDao.update(updated)
