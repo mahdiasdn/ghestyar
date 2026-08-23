@@ -61,7 +61,11 @@ data class CashflowSummary(
     val totalIncome: Long = 0L,
     val totalExpense: Long = 0L,
     val thisMonthInstallments: Long = 0L,
+    val thisMonthPayableCheques: Long = 0L,
+    val thisMonthReceivableCheques: Long = 0L,
     val netBalance: Long = 0L,
+    val totalMonthlyInflow: Long = 0L,
+    val totalMonthlyOutflow: Long = 0L,
     val remainingAfterInstallments: Long = 0L,
     val recurringMonthlyIncome: Long = 0L,
     val recurringMonthlyExpense: Long = 0L
@@ -253,11 +257,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         list.filter { it.profileId == pId }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    // ─── خلاصه دخل و خرج ماهانه (مربوط به پروفایل فعال) ───
+    // ─── خلاصه دخل و خرج ماهانه (مربوط به پروفایل فعال با احتساب اقساط و چک‌ها) ───
     val cashflowSummary: StateFlow<CashflowSummary> = combine(
         transactions,
-        active
-    ) { txList, activeInstallments ->
+        active,
+        pendingChequesAndDebts
+    ) { txList, activeInstallments, chequesList ->
         val today = JalaliDate.today()
         val currentMonth = today.jm
         val currentYear = today.jy
@@ -274,7 +279,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         // تعهدات اقساط ماه جاری: مجموع مبالغ ماهانه تمام اقساط فعال
         val monthInstallments = activeInstallments.sumOf { it.amount }
 
-        val remainingAfterGhest = net - monthInstallments
+        // چک‌ها و بدهی‌ها/طلب‌های سررسید ماه جاری
+        val thisMonthCheques = chequesList.filter {
+            val jDate = LocalDate.ofEpochDay(it.dueEpochDay).toJalali()
+            jDate.jy == currentYear && jDate.jm == currentMonth
+        }
+        val payableCheques = thisMonthCheques.filter { !it.isReceivable }.sumOf { it.amount }
+        val receivableCheques = thisMonthCheques.filter { it.isReceivable }.sumOf { it.amount }
+
+        val totalInflow = income + receivableCheques
+        val totalOutflow = expense + monthInstallments + payableCheques
+        val remainingNet = totalInflow - totalOutflow
 
         // درآمدهای تکرارشونده و ثابت ماهانه در پروفایل فعال
         val recurringIncome = txList.filter { it.isIncome && it.isRecurring }.sumOf { it.amount }
@@ -284,8 +299,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             totalIncome = income,
             totalExpense = expense,
             thisMonthInstallments = monthInstallments,
+            thisMonthPayableCheques = payableCheques,
+            thisMonthReceivableCheques = receivableCheques,
             netBalance = net,
-            remainingAfterInstallments = remainingAfterGhest,
+            totalMonthlyInflow = totalInflow,
+            totalMonthlyOutflow = totalOutflow,
+            remainingAfterInstallments = remainingNet,
             recurringMonthlyIncome = recurringIncome,
             recurringMonthlyExpense = recurringExpense
         )

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.*
@@ -532,7 +533,7 @@ private fun EnhancedCashflowDashboardCard(
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        if (isPositive) Icons.Rounded.TrendingUp else Icons.Rounded.TrendingDown,
+                                        if (isPositive) Icons.AutoMirrored.Rounded.TrendingUp else Icons.AutoMirrored.Rounded.TrendingDown,
                                         contentDescription = null,
                                         tint = if (isPositive) Moss else Coral,
                                         modifier = Modifier.size(17.dp)
@@ -568,7 +569,6 @@ private fun EnhancedCashflowDashboardCard(
                             )
                         }
                     }
-
                     // سطر ۲: عدد بزرگ نقدینگی خالص پس از کسر اقساط
                     Row(
                         verticalAlignment = Alignment.Bottom,
@@ -594,7 +594,7 @@ private fun EnhancedCashflowDashboardCard(
             }
         }
 
-        // ۲. ردیف کارت‌های سه‌گانه Bento (دریافتی‌ها، مخارج جاری، اقساط این ماه)
+        // ۲. ردیف کارت‌های چهارگانه Bento (دریافتی‌ها، مخارج جاری، اقساط این ماه، چک‌ها و بدهی‌ها)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -660,7 +660,12 @@ private fun EnhancedCashflowDashboardCard(
                     )
                 }
             }
+        }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             // کارت اقساط این ماه
             Surface(
                 modifier = Modifier
@@ -668,16 +673,16 @@ private fun EnhancedCashflowDashboardCard(
                     .bounceClick(minScale = 0.96f),
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f))
+                border = BorderStroke(1.dp, Color(0xFF0D9488).copy(alpha = 0.25f))
             ) {
                 Column(
                     modifier = Modifier.padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), modifier = Modifier.size(24.dp)) {
+                        Surface(shape = CircleShape, color = Color(0xFF0D9488).copy(alpha = 0.15f), modifier = Modifier.size(24.dp)) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Rounded.AccountBalance, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
+                                Icon(Icons.Rounded.AccountBalance, contentDescription = null, tint = Color(0xFF0D9488), modifier = Modifier.size(14.dp))
                             }
                         }
                         Text("اقساط ماه", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
@@ -686,20 +691,53 @@ private fun EnhancedCashflowDashboardCard(
                         formatMoney(cashflow.thisMonthInstallments),
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color(0xFF0D9488),
+                        maxLines = 1
+                    )
+                }
+            }
+
+            // کارت چک‌ها و بدهی‌های پرداختی این ماه
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .bounceClick(minScale = 0.96f),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                border = BorderStroke(1.dp, ChequeBlue.copy(alpha = 0.25f))
+            ) {
+                Column(
+                    modifier = Modifier.padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Surface(shape = CircleShape, color = ChequeBlue.copy(alpha = 0.15f), modifier = Modifier.size(24.dp)) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Rounded.HistoryEdu, contentDescription = null, tint = ChequeBlue, modifier = Modifier.size(14.dp))
+                            }
+                        }
+                        Text("چک‌ها و بدهی", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                    }
+                    Text(
+                        formatMoney(cashflow.thisMonthPayableCheques),
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = ChequeBlue,
                         maxLines = 1
                     )
                 }
             }
         }
 
-        // ۳. کارت تفکیک سهم کسری و مصارف ماه (اقساط در برابر مخارج جاری)
-        val totalOutflow = cashflow.totalExpense + cashflow.thisMonthInstallments
+        // ۳. کارت تفکیک سهم کسری و مصارف ماه (مخارج + اقساط + چک‌ها)
+        val totalOutflow = cashflow.totalMonthlyOutflow
         val isDeficit = cashflow.remainingAfterInstallments < 0
-        val expenseRatio = if (totalOutflow > 0) (cashflow.totalExpense.toFloat() / totalOutflow).coerceIn(0f, 1f) else 0.5f
-        val installmentRatio = if (totalOutflow > 0) (cashflow.thisMonthInstallments.toFloat() / totalOutflow).coerceIn(0f, 1f) else 0.5f
+        val expenseRatio = if (totalOutflow > 0) (cashflow.totalExpense.toFloat() / totalOutflow).coerceIn(0f, 1f) else 0.33f
+        val installmentRatio = if (totalOutflow > 0) (cashflow.thisMonthInstallments.toFloat() / totalOutflow).coerceIn(0f, 1f) else 0.33f
+        val chequeRatio = if (totalOutflow > 0) (cashflow.thisMonthPayableCheques.toFloat() / totalOutflow).coerceIn(0f, 1f) else 0.33f
         val expensePercent = (expenseRatio * 100).toInt()
-        val installmentPercent = (100 - expensePercent).coerceAtLeast(0)
+        val installmentPercent = (installmentRatio * 100).toInt()
+        val chequePercent = (100 - expensePercent - installmentPercent).coerceAtLeast(0)
 
         Surface(
             shape = RoundedCornerShape(20.dp),
@@ -739,7 +777,7 @@ private fun EnhancedCashflowDashboardCard(
                     )
                 }
 
-                // نوار گرافیکی دوقسمتی درصد اقساط vs مخارج
+                // نوار گرافیکی چندقسمتی درصد مخارج vs اقساط vs چک‌ها
                 if (totalOutflow > 0) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Row(
@@ -762,7 +800,15 @@ private fun EnhancedCashflowDashboardCard(
                                     modifier = Modifier
                                         .weight(installmentRatio.coerceAtLeast(0.01f))
                                         .fillMaxHeight()
-                                        .background(MaterialTheme.colorScheme.primary)
+                                        .background(Color(0xFF0D9488))
+                                )
+                            }
+                            if (cashflow.thisMonthPayableCheques > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(chequeRatio.coerceAtLeast(0.01f))
+                                        .fillMaxHeight()
+                                        .background(ChequeBlue)
                                 )
                             }
                         }
@@ -783,8 +829,8 @@ private fun EnhancedCashflowDashboardCard(
                                         .background(Coral)
                                 )
                                 Text(
-                                    "سهم مخارج: ${expensePercent.faDigits()}٪ (${if (isPrivacy) "•••" else "${cashflow.totalExpense.money()} ت"})",
-                                    fontSize = 10.sp,
+                                    "مخارج: ${expensePercent.faDigits()}٪",
+                                    fontSize = 9.5.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = Coral
                                 )
@@ -798,13 +844,31 @@ private fun EnhancedCashflowDashboardCard(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
+                                        .background(Color(0xFF0D9488))
                                 )
                                 Text(
-                                    "سهم اقساط: ${installmentPercent.faDigits()}٪ (${if (isPrivacy) "•••" else "${cashflow.thisMonthInstallments.money()} ت"})",
-                                    fontSize = 10.sp,
+                                    "اقساط: ${installmentPercent.faDigits()}٪",
+                                    fontSize = 9.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = Color(0xFF0D9488)
+                                )
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(ChequeBlue)
+                                )
+                                Text(
+                                    "چک‌ها: ${chequePercent.faDigits()}٪",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = ChequeBlue
                                 )
                             }
                         }
@@ -818,9 +882,9 @@ private fun EnhancedCashflowDashboardCard(
                 ) {
                     Text(
                         text = if (isDeficit) {
-                            "کسری خالص ماه: ${kotlin.math.abs(cashflow.remainingAfterInstallments).money()} تومان است. از کل ${totalOutflow.money()} تومان خروجی، ${cashflow.thisMonthInstallments.money()} تومان (${installmentPercent.faDigits()}٪) صرف اقساط و ${cashflow.totalExpense.money()} تومان (${expensePercent.faDigits()}٪) صرف مخارج جاری شده است."
+                            "کسری خالص ماه: ${kotlin.math.abs(cashflow.remainingAfterInstallments).money()} تومان است. مجموع تعهدات خروجی شامل ${cashflow.totalExpense.money()} تومان مخارج، ${cashflow.thisMonthInstallments.money()} تومان اقساط و ${cashflow.thisMonthPayableCheques.money()} تومان چک‌های این ماه از کل ورودی بیشتر است."
                         } else {
-                            "پس از پرداخت تمام ${cashflow.thisMonthInstallments.money()} تومان اقساط و ${cashflow.totalExpense.money()} تومان مخارج، مبلغ ${cashflow.remainingAfterInstallments.money()} تومان نقدینگی مازاد برای شما آزاد می‌ماند."
+                            "پس از کسر تمام ${cashflow.totalExpense.money()} تومان مخارج، ${cashflow.thisMonthInstallments.money()} تومان اقساط و ${cashflow.thisMonthPayableCheques.money()} تومان چک‌های ماه، مبلغ ${cashflow.remainingAfterInstallments.money()} تومان نقدینگی خالص برای شما آزاد می‌ماند."
                         },
                         fontSize = 10.5.sp,
                         lineHeight = 16.sp,

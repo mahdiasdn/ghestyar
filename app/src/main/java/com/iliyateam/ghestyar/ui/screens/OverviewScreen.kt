@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,11 +29,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.graphics.Brush
+import com.iliyateam.ghestyar.CashflowSummary
 import com.iliyateam.ghestyar.FinancialStats
 import com.iliyateam.ghestyar.MainViewModel
 import com.iliyateam.ghestyar.data.ChequeOrDebt
 import com.iliyateam.ghestyar.data.Installment
 import com.iliyateam.ghestyar.data.SavingsGoal
+import com.iliyateam.ghestyar.ui.components.AnimatedMoneyText
 import com.iliyateam.ghestyar.ui.components.ReceiptShareHelper
 import com.iliyateam.ghestyar.ui.components.StaggeredItemEntrance
 import com.iliyateam.ghestyar.ui.components.bounceClick
@@ -186,38 +189,16 @@ fun OverviewScreen(
                 contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // ۱. کارت‌های خلاصه Bento
+                // ۱. مرکز جامع تراز مالی و تفکیک جریان نقدینگی ماهانه
                 item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    OverviewStatCard(
-                        modifier = Modifier.weight(1f),
-                        title = "اقساط فعال این ماه",
-                        value = if (isPrivacyMode) "••••••" else "${cashflow.thisMonthInstallments.money()} ت",
-                        icon = Icons.AutoMirrored.Rounded.ReceiptLong,
-                        tint = Moss,
-                        subText = "${stats.activeCount.faDigits()} قسط فعال"
-                    )
-
-                    OverviewStatCard(
-                        modifier = Modifier.weight(1f),
-                        title = "نقدینگی آزاد این ماه",
-                        value = if (isPrivacyMode) "••••••" else "${cashflow.remainingAfterInstallments.money()} ت",
-                        icon = Icons.Rounded.AccountBalanceWallet,
-                        tint = if (cashflow.remainingAfterInstallments >= 0) Moss else Coral,
-                        subText = if (cashflow.remainingAfterInstallments >= 0) "پس از کسر اقساط ✨" else "کسری بودجه ماه ⚠️"
+                    DashboardFinancialSummaryHub(
+                        cashflow = cashflow,
+                        activeInstallmentsCount = activeInstallments.size,
+                        pendingChequesCount = pendingCheques.size,
+                        isPrivacy = isPrivacyMode,
+                        onOpenCashflow = onOpenCashflow
                     )
                 }
-            }
-        }
 
         // ۴. تقویم ماهانه هوشمند شمسی با رنگ‌بندی کاملاً تفکیک‌شده
         item {
@@ -488,6 +469,219 @@ fun OverviewScreen(
         }
     }
 }
+    }
+}
+
+@Composable
+private fun DashboardFinancialSummaryHub(
+    cashflow: CashflowSummary,
+    activeInstallmentsCount: Int,
+    pendingChequesCount: Int,
+    isPrivacy: Boolean,
+    onOpenCashflow: () -> Unit
+) {
+    val isPositive = cashflow.remainingAfterInstallments >= 0
+    val totalInflow = cashflow.totalMonthlyInflow
+    val totalOutflow = cashflow.totalMonthlyOutflow
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // ۱. کارت اصلی هیرو تراز نهایی ماهانه (Hero Net Balance Hub)
+        Card(
+            onClick = onOpenCashflow,
+            modifier = Modifier
+                .fillMaxWidth()
+                .bounceClick(minScale = 0.98f),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            border = BorderStroke(
+                1.dp,
+                if (isPositive) Moss.copy(alpha = 0.35f) else Coral.copy(alpha = 0.35f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                (if (isPositive) Moss else Coral).copy(alpha = 0.12f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+                    .padding(18.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // سطر بالا: عنوان تراز و بج وضعیت
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = (if (isPositive) Moss else Coral).copy(alpha = 0.18f),
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        if (isPositive) Icons.AutoMirrored.Rounded.TrendingUp else Icons.AutoMirrored.Rounded.TrendingDown,
+                                        contentDescription = null,
+                                        tint = if (isPositive) Moss else Coral,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    "مانده خالص نقدینگی ماه",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    "کسر تمام مخارج، اقساط و چک‌ها از درآمدها",
+                                    fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = (if (isPositive) Moss else Coral).copy(alpha = 0.15f),
+                            border = BorderStroke(0.8.dp, (if (isPositive) Moss else Coral).copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                if (isPositive) "تراز مثبت ماه 📈" else "کسری بودجه 📉",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isPositive) Moss else Coral,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
+                    // عدد مانده نهایی
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        AnimatedMoneyText(
+                            amount = cashflow.remainingAfterInstallments,
+                            isPrivacy = isPrivacy,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isPositive) Moss else Coral
+                        )
+                        if (!isPrivacy) {
+                            Text(
+                                "تومان",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                        }
+                    }
+
+                    // نوار نمایش شفاف فرمول تفکیکی
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (isPrivacy) "ورودی‌ها: ••••••" else "کل ورودی: ${totalInflow.money()} ت",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Moss
+                            )
+                            Text(
+                                text = "—",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = if (isPrivacy) "تعهدات: ••••••" else "کل خروجی: ${totalOutflow.money()} ت",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Coral
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // ۲. کارت‌های تفکیک‌شده Bento چهارگانه
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // ۱. کل درآمدها
+            OverviewStatCard(
+                modifier = Modifier.weight(1f),
+                title = "درآمدهای ماه",
+                value = if (isPrivacy) "••••••" else "${cashflow.totalIncome.money()} ت",
+                icon = Icons.Rounded.ArrowDownward,
+                tint = Moss,
+                subText = if (cashflow.thisMonthReceivableCheques > 0) "+${cashflow.thisMonthReceivableCheques.money()} طلب" else "درآمد جاری"
+            )
+
+            // ۲. هزینه‌ها و مخارج
+            OverviewStatCard(
+                modifier = Modifier.weight(1f),
+                title = "مخارج و هزینه‌ها",
+                value = if (isPrivacy) "••••••" else "${cashflow.totalExpense.money()} ت",
+                icon = Icons.Rounded.ArrowUpward,
+                tint = Coral,
+                subText = "هزینه‌های ثبت‌شده"
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // ۳. اقساط وام‌ها
+            OverviewStatCard(
+                modifier = Modifier.weight(1f),
+                title = "اقساط این ماه",
+                value = if (isPrivacy) "••••••" else "${cashflow.thisMonthInstallments.money()} ت",
+                icon = Icons.AutoMirrored.Rounded.ReceiptLong,
+                tint = Color(0xFF0D9488),
+                subText = "${activeInstallmentsCount.faDigits()} قسط فعال"
+            )
+
+            // ۴. چک‌ها و بدهی‌ها
+            OverviewStatCard(
+                modifier = Modifier.weight(1f),
+                title = "چک‌ها و بدهی‌ها",
+                value = if (isPrivacy) "••••••" else "${cashflow.thisMonthPayableCheques.money()} ت",
+                icon = Icons.Rounded.HistoryEdu,
+                tint = ChequeBlue,
+                subText = if (cashflow.thisMonthReceivableCheques > 0) "${pendingChequesCount.faDigits()} چک • طلب دار" else "${pendingChequesCount.faDigits()} چک در انتظار"
+            )
+        }
     }
 }
 
