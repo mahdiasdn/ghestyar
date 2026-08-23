@@ -50,7 +50,6 @@ fun OverviewScreen(
     onOpenCalculator: () -> Unit,
     onAddInstallment: () -> Unit,
     onOpenCashflow: () -> Unit,
-    onOpenGoalsCheques: () -> Unit,
     onDetailInstallment: (Installment) -> Unit,
     onPremium: () -> Unit = {},
     selectedDashboardTab: Int = 0,

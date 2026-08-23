@@ -461,10 +461,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val newPaidSessions = item.paidSessions + 1
             val isLast = newPaidSessions >= item.totalSessions
 
-            // محاسبه کاملاً قطعی و بدون انحراف موعد سررسید قسط بعدی بر اساس تاریخ شروع وام
-            val baseStart = LocalDate.ofEpochDay(item.startEpochDay).toJalali()
+            val currentDue = LocalDate.ofEpochDay(item.dueEpochDay).toJalali()
             val nextDueEpoch = if (!isLast) {
-                baseStart.plusMonths(newPaidSessions).toLocalDate().toEpochDay()
+                currentDue.plusMonths(1).toLocalDate().toEpochDay()
             } else {
                 item.dueEpochDay
             }
@@ -490,10 +489,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             if (item.paidSessions <= 0) return@launch
             val pName = activeProfile.value.name
             val newPaidSessions = item.paidSessions - 1
+            val wasPaid = item.isPaid
 
-            // محاسبه کاملاً قطعی و بدون انحراف موعد سررسید قسط قبلی بر اساس تاریخ شروع وام
-            val baseStart = LocalDate.ofEpochDay(item.startEpochDay).toJalali()
-            val prevDueEpoch = baseStart.plusMonths(newPaidSessions).toLocalDate().toEpochDay()
+            val currentDue = LocalDate.ofEpochDay(item.dueEpochDay).toJalali()
+            val prevDueEpoch = if (wasPaid) {
+                // در صورت بازگردانی از حالت کاملاً تسویه‌شده، تاریخ همان سررسید آخرین قسط است
+                item.dueEpochDay
+            } else {
+                // در حین اقساط جاری، تاریخ سررسید یک ماه به عقب بازمی‌گردد
+                currentDue.minusMonths(1).toLocalDate().toEpochDay()
+            }
 
             val updated = item.copy(
                 isPaid = false,

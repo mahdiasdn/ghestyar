@@ -27,3 +27,5 @@ local.properties
 # Logs
 *.log
 
+# Kotlin temp files
+.kotlin/

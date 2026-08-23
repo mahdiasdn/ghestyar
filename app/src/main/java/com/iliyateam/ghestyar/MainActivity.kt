@@ -52,7 +52,6 @@ enum class MainNavTab(val title: String, val icon: ImageVector) {
     OVERVIEW("داشبورد", Icons.Rounded.Dashboard),
     INSTALLMENTS("اقساط", Icons.AutoMirrored.Rounded.ReceiptLong),
     CASHFLOW("دخل‌خرج", Icons.Rounded.AccountBalanceWallet),
-    CHEQUES("چک‌ها", Icons.Rounded.HistoryEdu),
     SERVICES("خدمات", Icons.Rounded.Widgets),
     SETTINGS("تنظیمات", Icons.Rounded.Settings)
 }
@@ -409,7 +408,6 @@ class MainActivity : ComponentActivity() {
                                         onOpenCalculator = { showLoanCalculator = true },
                                         onAddInstallment = { currentScreen = ActiveScreen.ADD_INSTALLMENT },
                                         onOpenCashflow = { switchToTab(MainNavTab.CASHFLOW.ordinal) },
-                                        onOpenGoalsCheques = { switchToTab(MainNavTab.SERVICES.ordinal) },
                                         onDetailInstallment = { item -> detailedInstallment = item },
                                         onPremium = { showPremium = true },
                                         selectedDashboardTab = overviewSubTab,
@@ -438,13 +436,6 @@ class MainActivity : ComponentActivity() {
                                 }
                                 MainNavTab.CASHFLOW -> {
                                     CashflowScreen(
-                                        vm = vm,
-                                        isPremium = isPremium,
-                                        onOpenPremium = { showPremium = true }
-                                    )
-                                }
-                                MainNavTab.CHEQUES -> {
-                                    ChequesScreen(
                                         vm = vm,
                                         isPremium = isPremium,
                                         onOpenPremium = { showPremium = true }
