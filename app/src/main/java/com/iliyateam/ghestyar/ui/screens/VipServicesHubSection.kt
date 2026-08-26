@@ -240,12 +240,16 @@ internal fun SixMonthCashflowForecastCard(
             // درآمد ماه: ماه جاری کل درآمد، ماه‌های بعد درآمد ثابت/تکرارشونده
             val monthIncome = if (offset == 0) cashflow.totalIncome else baseFutureIncome
 
-            // اقساط فعال که در ماه مورد نظر هنوز جلسه پرداخت دارند
+            // اقساط فعال که در ماه مورد نظر جلسه پرداخت دارند
             val monthInstallments = installments.filter { inst ->
-                if (inst.isPaid && offset == 0) false
+                if (inst.isPaid || inst.paidSessions >= inst.totalSessions) false
                 else {
-                    val remainingSessions = (inst.totalSessions - inst.paidSessions).coerceAtLeast(0)
-                    remainingSessions > offset
+                    val startJ = LocalDate.ofEpochDay(inst.startEpochDay).toJalali()
+                    val remainingStartSession = inst.paidSessions + 1
+                    (remainingStartSession..inst.totalSessions).any { s ->
+                        val sessionDue = startJ.plusMonths(s - 1)
+                        sessionDue.jy == targetJalali.jy && sessionDue.jm == targetJalali.jm
+                    }
                 }
             }.sumOf { it.amount }
 

@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * دریافت‌کننده سیگنال راه‌اندازی مجدد دستگاه (Boot Completed)
+ * دریافت‌کننده سیگنال راه‌اندازی مجدد دستگاه (Boot Completed) و تغییر ساعت
  * برای بازسازی خودکار تمام آلارم‌ها و یادآورهای اقساط فعال
  */
 class BootReceiver : BroadcastReceiver() {
@@ -19,18 +19,22 @@ class BootReceiver : BroadcastReceiver() {
         val action = intent.action
         if (action == Intent.ACTION_BOOT_COMPLETED ||
             action == "android.intent.action.QUICKBOOT_POWERON" ||
-            action == Intent.ACTION_MY_PACKAGE_REPLACED
+            action == Intent.ACTION_MY_PACKAGE_REPLACED ||
+            action == Intent.ACTION_TIME_CHANGED ||
+            action == Intent.ACTION_TIMEZONE_CHANGED
         ) {
             val pendingResult = goAsync()
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val db = AppDatabase.get(context)
+                    val prefs = context.getSharedPreferences("ghestyar_settings", Context.MODE_PRIVATE)
+                    val hour = prefs.getInt("notif_hour", 9)
                     val profilesMap = db.userProfileDao().getAll().associateBy { it.id }
                     val activeInstallments = db.installmentDao().getAll().filter { !it.isPaid && it.remind }
 
                     for (item in activeInstallments) {
                         val profileName = profilesMap[item.profileId]?.name.orEmpty()
-                        ReminderScheduler.schedule(context, item, profileName)
+                        ReminderScheduler.schedule(context, item, profileName, hour)
                     }
 
                     GhestYarWidgetProvider.updateAll(context)

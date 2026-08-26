@@ -24,7 +24,18 @@ import com.iliyateam.ghestyar.ui.theme.Coral
 import com.iliyateam.ghestyar.ui.theme.Moss
 import com.iliyateam.ghestyar.util.faDigits
 
+private const val PIN_SALT = "ghestyar_secure_pin_salt_v1_"
+
 private fun hashPin(pin: String): String {
+    if (pin.isBlank()) return ""
+    return try {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val digest = md.digest((PIN_SALT + pin).toByteArray(Charsets.UTF_8))
+        digest.fold("") { str, it -> str + "%02x".format(it) }
+    } catch (_: Exception) { pin }
+}
+
+private fun simpleHashPin(pin: String): String {
     if (pin.isBlank()) return ""
     return try {
         val md = java.security.MessageDigest.getInstance("SHA-256")
@@ -57,7 +68,8 @@ fun PinLockDialog(
                     onPinSet(newPin)
                     onSuccess()
                 } else {
-                    if (newPin == correctPin || hashPin(newPin) == correctPin) {
+                    val matches = newPin == correctPin || hashPin(newPin) == correctPin || simpleHashPin(newPin) == correctPin
+                    if (matches) {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSuccess()
                     } else {

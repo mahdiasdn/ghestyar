@@ -71,6 +71,18 @@ data class CashflowSummary(
     val recurringMonthlyExpense: Long = 0L
 )
 
+fun calculateThisMonthInstallmentsCommitment(activeInstallments: List<Installment>, todayJalali: JalaliDate = JalaliDate.today()): Long {
+    val currentMonth = todayJalali.jm
+    val currentYear = todayJalali.jy
+    return activeInstallments.filter { item ->
+        if (item.isPaid || item.paidSessions >= item.totalSessions) false
+        else {
+            val dueJ = LocalDate.ofEpochDay(item.dueEpochDay).toJalali()
+            dueJ.jy == currentYear && dueJ.jm == currentMonth
+        }
+    }.sumOf { it.amount }
+}
+
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val db = AppDatabase.get(app)
     private val installmentDao = db.installmentDao()
@@ -122,9 +134,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
                 // زمان‌بندی مجدد و هوشمند تمام اعلان‌ها با درج نام پروفایل
                 val profilesMap = userProfileDao.getAll().associateBy { it.id }
+                val hour = notificationHour.value
                 installmentDao.getAll().filter { !it.isPaid && it.remind }.forEach { item ->
                     val pName = profilesMap[item.profileId]?.name.orEmpty()
-                    ReminderScheduler.schedule(getApplication(), item, pName)
+                    ReminderScheduler.schedule(getApplication(), item, pName, hour)
                 }
             } catch (_: Exception) { }
         }
@@ -276,8 +289,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val expense = thisMonthTx.filter { !it.isIncome }.sumOf { it.amount }
         val net = income - expense
 
-        // تعهدات اقساط ماه جاری: مجموع مبالغ ماهانه تمام اقساط فعال
-        val monthInstallments = activeInstallments.sumOf { it.amount }
+        // تعهدات اقساط ماه جاری: مجموع مبالغ اقساط فعالی که تاریخ سررسیدشان در ماه شمسی جاری است
+        val monthInstallments = calculateThisMonthInstallmentsCommitment(activeInstallments, today)
 
         // چک‌ها و بدهی‌ها/طلب‌های سررسید ماه جاری
         val thisMonthCheques = chequesList.filter {
@@ -291,11 +304,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val totalOutflow = expense + monthInstallments + payableCheques
         val remainingNet = totalInflow - totalOutflow
 
-        // درآمدهای تکرارشونده و ثابت ماهانه در پروفایل فعال (محاسبه ماه جاری یا یکتا برای جلوگیری از دوباره‌شماری ماه‌های قبل)
-        val recurringIncome = thisMonthTx.filter { it.isIncome && it.isRecurring }.sumOf { it.amount }
-            .takeIf { it > 0 } ?: txList.filter { it.isIncome && it.isRecurring }.distinctBy { it.title.trim().lowercase() }.sumOf { it.amount }
-        val recurringExpense = thisMonthTx.filter { !it.isIncome && it.isRecurring }.sumOf { it.amount }
-            .takeIf { it > 0 } ?: txList.filter { !it.isIncome && it.isRecurring }.distinctBy { it.title.trim().lowercase() }.sumOf { it.amount }
+        // درآمدهای تکرارشونده: برای هر ترکیب «عنوان + دسته»، فقط جدیدترین تراکنش تکرارشونده حساب شود
+        val recurringIncome = txList.filter { it.isRecurring && it.isIncome }
+            .groupBy { it.title.trim().lowercase() to it.category }
+            .values
+            .sumOf { group -> group.maxByOrNull { it.epochDay }?.amount ?: 0L }
+
+        val recurringExpense = txList.filter { it.isRecurring && !it.isIncome }
+            .groupBy { it.title.trim().lowercase() to it.category }
+            .values
+            .sumOf { group -> group.maxByOrNull { it.epochDay }?.amount ?: 0L }
 
         CashflowSummary(
             totalIncome = income,
@@ -404,7 +422,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         prefs.edit().putBoolean("privacy_mode", enabled).apply()
     }
 
+    private val pinSalt = "ghestyar_secure_pin_salt_v1_"
+
     private fun hashPin(pin: String): String {
+        if (pin.isBlank()) return ""
+        return try {
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            val digest = md.digest((pinSalt + pin).toByteArray(Charsets.UTF_8))
+            digest.fold("") { str, it -> str + "%02x".format(it) }
+        } catch (_: Exception) { pin }
+    }
+
+    private fun simpleHashPin(pin: String): String {
         if (pin.isBlank()) return ""
         return try {
             val md = java.security.MessageDigest.getInstance("SHA-256")
@@ -416,11 +445,23 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun verifyPin(inputPin: String): Boolean {
         val stored = pinCode.value
         if (stored.isBlank()) return true
-        return stored == inputPin || stored == hashPin(inputPin)
+        // سازگاری با کاربران دارای پین خام و ارتقای خودکار به هش با سالت
+        if (stored == inputPin) {
+            setPinLock(true, inputPin)
+            return true
+        }
+        if (stored == hashPin(inputPin)) return true
+        if (stored == simpleHashPin(inputPin)) {
+            setPinLock(true, inputPin)
+            return true
+        }
+        return false
     }
 
     fun setPinLock(enabled: Boolean, code: String = "") {
-        val hashed = if (code.isNotBlank()) hashPin(code) else ""
+        val hashed = if (code.isNotBlank()) {
+            if (code.length == 64) code else hashPin(code)
+        } else ""
         isPinLockEnabled.value = enabled
         pinCode.value = hashed
         prefs.edit()
@@ -472,7 +513,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 profileId = pId
             )
             val id = installmentDao.insert(item)
-            if (remind) ReminderScheduler.schedule(getApplication(), item.copy(id = id), pName)
+            val notifH = notificationHour.value
+            if (remind) ReminderScheduler.schedule(getApplication(), item.copy(id = id), pName, notifH)
         }
     }
 
@@ -483,6 +525,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     ) {
         viewModelScope.launch {
             val pName = activeProfile.value.name
+            val notifH = notificationHour.value
             val updated = item.copy(
                 title = title.trim(),
                 amount = amount,
@@ -496,7 +539,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 destination = destination.trim()
             )
             installmentDao.update(updated)
-            if (remind) ReminderScheduler.schedule(getApplication(), updated, pName)
+            if (remind) ReminderScheduler.schedule(getApplication(), updated, pName, notifH)
             else ReminderScheduler.cancel(getApplication(), updated)
         }
     }
@@ -506,6 +549,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             if (item.paidSessions >= item.totalSessions) return@launch
             val today = LocalDate.now()
             val pName = activeProfile.value.name
+            val notifH = notificationHour.value
             val newPaidSessions = item.paidSessions + 1
             val isLast = newPaidSessions >= item.totalSessions
 
@@ -526,7 +570,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             if (isLast) {
                 ReminderScheduler.cancel(getApplication(), item)
             } else if (updated.remind) {
-                ReminderScheduler.schedule(getApplication(), updated, pName)
+                ReminderScheduler.schedule(getApplication(), updated, pName, notifH)
             }
             com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(getApplication())
         }
@@ -536,6 +580,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             if (item.paidSessions <= 0) return@launch
             val pName = activeProfile.value.name
+            val notifH = notificationHour.value
             val newPaidSessions = item.paidSessions - 1
             val wasPaid = item.isPaid
 
@@ -555,7 +600,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 paidAtEpochDay = null
             )
             installmentDao.update(updated)
-            if (updated.remind) ReminderScheduler.schedule(getApplication(), updated, pName)
+            if (updated.remind) ReminderScheduler.schedule(getApplication(), updated, pName, notifH)
             com.iliyateam.ghestyar.widget.GhestYarWidgetProvider.updateAll(getApplication())
         }
     }
@@ -856,8 +901,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 installmentDao.insertAll(data.installments)
                 instCount = data.installments.size
                 val pName = activeProfile.value.name
+                val hour = notificationHour.value
                 data.installments.filter { !it.isPaid && it.remind }.forEach {
-                    ReminderScheduler.schedule(getApplication(), it, pName)
+                    ReminderScheduler.schedule(getApplication(), it, pName, hour)
                 }
             }
 
@@ -892,10 +938,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             if (items.isNotEmpty()) {
                 val pId = activeProfileId.value
                 val pName = activeProfile.value.name
+                val hour = notificationHour.value
                 val mapped = items.map { it.copy(profileId = pId) }
                 installmentDao.insertAll(mapped)
                 mapped.filter { !it.isPaid && it.remind }.forEach {
-                    ReminderScheduler.schedule(getApplication(), it, pName)
+                    ReminderScheduler.schedule(getApplication(), it, pName, hour)
                 }
             }
             onComplete(items.size)
