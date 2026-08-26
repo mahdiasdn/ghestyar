@@ -96,8 +96,9 @@ fun VipServicesHubSection(
                             )
                             Text(
                                 title,
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                ),
                                 color = if (isSelected) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -158,13 +159,13 @@ internal fun AvalancheInterestSaverCard(
                     Text("بهینه‌ساز هوشمند سود بانکی (روش بهمن)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
                 }
                 Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.16f)) {
-                    Text("⭐ VIP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                    Text("⭐ VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                 }
             }
 
             Text(
                 "استراتژی بهمن (Avalanche) با تسویه سریع‌تر وام‌های پربهره، بیشترین میزان سود بانکی را به جیب شما برمی‌گرداند:",
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -182,14 +183,14 @@ internal fun AvalancheInterestSaverCard(
                 ) {
                     Text("💰", fontSize = 26.sp)
                     Column {
-                        Text("میزان سود صرفه‌جویی‌شده برای شما:", fontSize = 11.sp, color = Moss)
+                        Text("میزان سود صرفه‌جویی‌شده برای شما:", style = MaterialTheme.typography.labelMedium, color = Moss)
                         Text(
                             "+${estimatedInterestSaved.money()} تومان",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = Moss
                         )
-                        Text("سود کمتری که به بانک‌ها و شرکت‌های واسط پرداخت خواهید کرد.", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("سود کمتری که به بانک‌ها و شرکت‌های واسط پرداخت خواهید کرد.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -200,8 +201,8 @@ internal fun AvalancheInterestSaverCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("توان پرداخت مازاد ماهانه:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("+${extraMonthlyPay.toLong().money()} تومان", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                    Text("توان پرداخت مازاد ماهانه:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("+${extraMonthlyPay.toLong().money()} تومان", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                 }
                 Slider(
                     value = extraMonthlyPay,
@@ -288,13 +289,13 @@ internal fun SixMonthCashflowForecastCard(
                     Text("پیش‌بینی نقدینگی ۶ ماه آینده", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
                 }
                 Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.16f)) {
-                    Text("هوشمند ⭐", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                    Text("هوشمند ⭐", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                 }
             }
 
             Text(
                 "پیش‌بینی تراز موجودی شما پس از کسر تمام اقساط و سررسید چک‌های ۶ ماه آینده:",
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -315,16 +316,15 @@ internal fun SixMonthCashflowForecastCard(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(monthName, fontSize = 10.5.sp, fontWeight = FontWeight.Bold)
+                            Text(monthName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                             Text(
                                 if (isDeficit) "⚠️ کسری" else "🟢 مثبت",
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = if (isDeficit) Coral else Moss
                             )
                             Text(
                                 "${(projected / 1000).money()} ه.ت",
-                                fontSize = 8.5.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -401,7 +401,7 @@ internal fun SmartSmsReminderCard(
                     Text("استودیو و پیامک‌ساز هوشمند", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
                 }
                 Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.16f)) {
-                    Text("⭐ VIP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                    Text("⭐ VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                 }
             }
 
@@ -439,8 +439,9 @@ internal fun SmartSmsReminderCard(
                     ) {
                         Text(
                             label,
-                            fontSize = 10.5.sp,
-                            fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal
+                            ),
                             color = if (isSel) Color.Black else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(vertical = 6.dp),
                             textAlign = TextAlign.Center
@@ -463,7 +464,7 @@ internal fun SmartSmsReminderCard(
                                 cardOrShaba = inst.destination.ifBlank { cardOrShaba }
                                 isUserManuallyEditingText = false
                             },
-                            label = { Text(inst.title, fontSize = 10.5.sp) },
+                            label = { Text(inst.title, style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(50)
                         )
                     }
@@ -481,7 +482,7 @@ internal fun SmartSmsReminderCard(
                                 dueDateStr = "${j.jy.faDigits()}/${j.jm.faDigits().padStart(2, '۰')}/${j.jd.faDigits().padStart(2, '۰')}"
                                 isUserManuallyEditingText = false
                             },
-                            label = { Text("${ch.title} (${ch.personName})", fontSize = 10.5.sp) },
+                            label = { Text("${ch.title} (${ch.personName})", style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(50)
                         )
                     }
@@ -493,7 +494,7 @@ internal fun SmartSmsReminderCard(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it; isUserManuallyEditingText = false },
-                    label = { Text("عنوان قسط / تعهد", fontSize = 10.5.sp) },
+                    label = { Text("عنوان قسط / تعهد", style = MaterialTheme.typography.labelMedium) },
                     modifier = Modifier.weight(1.2f),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true
@@ -501,8 +502,8 @@ internal fun SmartSmsReminderCard(
                 OutlinedTextField(
                     value = recipientName,
                     onValueChange = { recipientName = it; isUserManuallyEditingText = false },
-                    label = { Text("نام مخاطب", fontSize = 10.5.sp) },
-                    placeholder = { Text("اختیاری", fontSize = 10.sp) },
+                    label = { Text("نام مخاطب", style = MaterialTheme.typography.labelMedium) },
+                    placeholder = { Text("اختیاری", style = MaterialTheme.typography.labelMedium) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true
@@ -513,7 +514,7 @@ internal fun SmartSmsReminderCard(
                 OutlinedTextField(
                     value = if (amountDigits.isEmpty()) "" else amountLong.money(),
                     onValueChange = { v -> amountDigits = v.cleanNumericDigits(12); isUserManuallyEditingText = false },
-                    label = { Text("مبلغ (تومان)", fontSize = 10.5.sp) },
+                    label = { Text("مبلغ (تومان)", style = MaterialTheme.typography.labelMedium) },
                     modifier = Modifier.weight(1.1f),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
@@ -522,7 +523,7 @@ internal fun SmartSmsReminderCard(
                 OutlinedTextField(
                     value = dueDateStr,
                     onValueChange = { dueDateStr = it; isUserManuallyEditingText = false },
-                    label = { Text("تاریخ سررسید", fontSize = 10.5.sp) },
+                    label = { Text("تاریخ سررسید", style = MaterialTheme.typography.labelMedium) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true
@@ -532,14 +533,14 @@ internal fun SmartSmsReminderCard(
             OutlinedTextField(
                 value = cardOrShaba,
                 onValueChange = { cardOrShaba = it; isUserManuallyEditingText = false },
-                label = { Text("شماره کارت، حساب یا شبا جهت واریز", fontSize = 10.5.sp) },
+                label = { Text("شماره کارت، حساب یا شبا جهت واریز", style = MaterialTheme.typography.labelMedium) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
             // انتخاب لحن پیام
-            Text("لحن پیام:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("لحن پیام:", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -554,8 +555,9 @@ internal fun SmartSmsReminderCard(
                     ) {
                         Text(
                             tone,
-                            fontSize = 9.5.sp,
-                            fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal
+                            ),
                             color = if (isSel) Color.White else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(vertical = 6.dp),
                             textAlign = TextAlign.Center
@@ -571,10 +573,10 @@ internal fun SmartSmsReminderCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("متن کامل پیام (قابل ویرایش مستقیم):", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("متن کامل پیام (قابل ویرایش مستقیم):", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (isUserManuallyEditingText) {
                         TextButton(onClick = { isUserManuallyEditingText = false; customMessageText = autoGeneratedText }) {
-                            Text("بازنشانی متن 🔄", fontSize = 10.sp, color = GoldVip)
+                            Text("بازنشانی متن 🔄", style = MaterialTheme.typography.labelMedium, color = GoldVip)
                         }
                     }
                 }
@@ -627,7 +629,7 @@ internal fun SmartSmsReminderCard(
                 ) {
                     Icon(Icons.AutoMirrored.Rounded.Send, null, tint = Color.Black, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("ارسال پیامک 📲", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text("ارسال پیامک 📲", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color.Black)
                 }
 
                 // اشتراک گذاری در پیام‌رسان‌ها
@@ -647,7 +649,7 @@ internal fun SmartSmsReminderCard(
                 ) {
                     Icon(Icons.Rounded.Share, null, modifier = Modifier.size(15.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("اشتراک‌گذاری", fontSize = 10.5.sp)
+                    Text("اشتراک‌گذاری", style = MaterialTheme.typography.labelMedium)
                 }
 
                 // کپی متن
@@ -695,18 +697,18 @@ internal fun LoanBookletGeneratorCard(
                     Text("تولید دفترچه رسمی اقساط بانکی (A4)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
                 }
                 Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.16f)) {
-                    Text("⭐ VIP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                    Text("⭐ VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                 }
             }
 
             Text(
                 "برای هر وام یک سند رسمی دو صفحه‌ای بانکی همراه با جدول ماه به ماه، بارکد و محل امضا جهت پرینت تولید کنید:",
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             if (installments.isEmpty()) {
-                Text("هنوز وامی برای صدور دفترچه ثبت نشده است.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("هنوز وامی برای صدور دفترچه ثبت نشده است.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
                 installments.forEach { inst ->
                     Surface(
@@ -720,8 +722,8 @@ internal fun LoanBookletGeneratorCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text(inst.title, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                Text("${inst.totalSessions.faDigits()} قسط • ${inst.amount.money()} تومان", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(inst.title, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                                Text("${inst.totalSessions.faDigits()} قسط • ${inst.amount.money()} تومان", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
 
                             Button(
@@ -731,7 +733,7 @@ internal fun LoanBookletGeneratorCard(
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                                 modifier = Modifier.bounceClick(minScale = 0.94f)
                             ) {
-                                Text("صدور دفترچه PDF 🖨️", fontSize = 10.5.sp, fontWeight = FontWeight.Bold)
+                                Text("صدور دفترچه PDF 🖨️", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                             }
                         }
                     }
@@ -775,13 +777,13 @@ internal fun HomeScreenWidgetCard(
                     Text("ویجت تعاملی صفحه اصلی گوشی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
                 }
                 Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.16f)) {
-                    Text("⭐ VIP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                    Text("⭐ VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                 }
             }
 
             Text(
                 "پیش‌نمایش زنده ویجت قسط‌یار بر روی صفحه اصلی دستگاه شما:",
-                fontSize = 11.5.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -801,7 +803,7 @@ internal fun HomeScreenWidgetCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("قسط‌یار • نزدیک‌ترین سررسید", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFA7F3D0))
+                        Text("قسط‌یار • نزدیک‌ترین سررسید", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFFA7F3D0))
                         Surface(
                             shape = RoundedCornerShape(50),
                             color = Color(0x33F59E0B)
@@ -809,15 +811,14 @@ internal fun HomeScreenWidgetCard(
                             val daysLabel = nextItem?.let {
                                 LocalDate.ofEpochDay(it.dueEpochDay).relativeLabel()
                             } ?: "تکمیل"
-                            Text(daysLabel, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFBBF24), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                            Text(daysLabel, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Color(0xFFFBBF24), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                         }
                     }
 
-                    Text(nextItem?.title ?: "خیالت آسوده ✨", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(nextItem?.title ?: "خیالت آسوده ✨", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
                     Text(
                         if (nextItem != null) "${nextItem.amount.money()} تومان" else "همه اقساط تسویه شده است",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color(0xFF34D399)
                     )
 
@@ -825,7 +826,7 @@ internal fun HomeScreenWidgetCard(
 
                     Text(
                         "تعهد این ماه: ${monthlyTotal.money()} تومان (${installments.filter { !it.isPaid }.size.faDigits()} قسط)",
-                        fontSize = 10.5.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = Color(0xFF9CA3AF)
                     )
                 }
@@ -854,7 +855,7 @@ internal fun HomeScreenWidgetCard(
             ) {
                 Icon(Icons.Rounded.Widgets, null, tint = Color.Black, modifier = Modifier.size(17.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("افزودن ویجت به صفحه اصلی گوشی 📱", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text("افزودن ویجت به صفحه اصلی گوشی 📱", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color.Black)
             }
         }
     }

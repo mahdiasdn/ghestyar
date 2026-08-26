@@ -114,7 +114,7 @@ fun InstallmentReceiptCardDialog(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("🌱", fontSize = 16.sp)
-                                Text("قسط‌یار • رسید الکترونیک", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFA7F3D0))
+                                Text("قسط‌یار • رسید الکترونیک", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFFA7F3D0))
                             }
                             Surface(shape = RoundedCornerShape(50), color = Color(0x3310B981)) {
                                 Row(
@@ -123,18 +123,17 @@ fun InstallmentReceiptCardDialog(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                 ) {
                                     Icon(Icons.Rounded.CheckCircle, null, tint = Color(0xFF6EE7B7), modifier = Modifier.size(12.dp))
-                                    Text("تسویه شد", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6EE7B7))
+                                    Text("تسویه شد", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF6EE7B7))
                                 }
                             }
                         }
 
                         // مبلغ بزرگ وسط کارت
                         Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                            Text("مبلغ پرداخت شده", fontSize = 10.sp, color = Color(0xCCE6F7F2))
+                            Text("مبلغ پرداخت شده", style = MaterialTheme.typography.labelMedium, color = Color(0xCCE6F7F2))
                             Text(
                                 "${item.amount.money()} تومان",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Black,
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
                                 color = Color.White
                             )
                         }
@@ -166,8 +165,8 @@ fun InstallmentReceiptCardDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("GH-PAY-${item.id.faDigits()}-${item.paidSessions.faDigits()}", fontSize = 9.sp, color = Color(0x88FFFFFF))
-                            Text("تایید شده در سامانه هوشمند قسط‌یار", fontSize = 8.sp, color = Color(0xAAFFFFFF))
+                            Text("GH-PAY-${item.id.faDigits()}-${item.paidSessions.faDigits()}", style = MaterialTheme.typography.labelSmall, color = Color(0x88FFFFFF))
+                            Text("تایید شده در سامانه هوشمند قسط‌یار", style = MaterialTheme.typography.labelSmall, color = Color(0xAAFFFFFF))
                         }
                     }
                 }
@@ -191,7 +190,7 @@ fun InstallmentReceiptCardDialog(
                 ) {
                     Icon(Icons.Rounded.Share, null, tint = Color.White, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("اشتراک‌گذاری کارت رسید", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("اشتراک‌گذاری کارت رسید", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
                 }
 
                 OutlinedButton(
@@ -199,7 +198,7 @@ fun InstallmentReceiptCardDialog(
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.height(48.dp)
                 ) {
-                    Text("بستن", fontSize = 12.sp)
+                    Text("بستن", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -281,13 +280,12 @@ fun ChequeReceiptCardDialog(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(if (isCheque) "🏛️" else "💼", fontSize = 16.sp)
-                                Text(if (isCheque) "یادآوری چک صیادی" else "یادآوری تعهد مالی", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFBFDBFE))
+                                Text(if (isCheque) "یادآوری چک صیادی" else "یادآوری تعهد مالی", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFFBFDBFE))
                             }
                             Surface(shape = RoundedCornerShape(50), color = Color(0x33FFFFFF)) {
                                 Text(
                                     if (item.isReceivable) "طلب (دریافتی)" else "بدهی (پرداختی)",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     color = Color.White,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                 )
@@ -296,11 +294,10 @@ fun ChequeReceiptCardDialog(
 
                         // مبلغ
                         Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                            Text("مبلغ سند مالی", fontSize = 10.sp, color = Color(0xCCDBEAFE))
+                            Text("مبلغ سند مالی", style = MaterialTheme.typography.labelMedium, color = Color(0xCCDBEAFE))
                             Text(
                                 "${item.amount.money()} تومان",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Black,
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
                                 color = Color.White
                             )
                         }
@@ -327,8 +324,8 @@ fun ChequeReceiptCardDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("SAYAD-${item.id.faDigits()}", fontSize = 9.sp, color = Color(0x88FFFFFF))
-                            Text("ثبت و یادآوری توسط قسط‌یار", fontSize = 8.sp, color = Color(0xAAFFFFFF))
+                            Text("SAYAD-${item.id.faDigits()}", style = MaterialTheme.typography.labelSmall, color = Color(0x88FFFFFF))
+                            Text("ثبت و یادآوری توسط قسط‌یار", style = MaterialTheme.typography.labelSmall, color = Color(0xAAFFFFFF))
                         }
                     }
                 }
@@ -352,7 +349,7 @@ fun ChequeReceiptCardDialog(
                 ) {
                     Icon(Icons.Rounded.Share, null, tint = Color.White, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("ارسال و اشتراک‌گذاری", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("ارسال و اشتراک‌گذاری", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
                 }
 
                 OutlinedButton(
@@ -360,7 +357,7 @@ fun ChequeReceiptCardDialog(
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.height(48.dp)
                 ) {
-                    Text("بستن", fontSize = 12.sp)
+                    Text("بستن", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -374,7 +371,7 @@ private fun ReceiptRow(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, fontSize = 11.sp, color = Color(0xCCFFFFFF))
-        Text(value, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = Color(0xCCFFFFFF))
+        Text(value, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
     }
 }

@@ -94,7 +94,7 @@ fun SettingsScreen(
             Spacer(Modifier.width(12.dp))
             Column {
                 Text("تنظیمات و شخصی‌سازی", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text("مدیریت پروفایل‌ها، تم، امنیت و فایل‌ها", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("مدیریت پروفایل‌ها، تم، امنیت و فایل‌ها", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -113,7 +113,7 @@ fun SettingsScreen(
                 ) {
                     Text(
                         "حساب‌های تعریف‌شده (${allProfiles.size.faDigits()} حساب)",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
@@ -140,8 +140,7 @@ fun SettingsScreen(
                         Spacer(Modifier.width(4.dp))
                         Text(
                             if (!isPremium && allProfiles.size >= 1) "حساب جدید (⭐ VIP)" else "افزودن حساب جدید",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = if (!isPremium && allProfiles.size >= 1) GoldVip else Moss
                         )
                     }
@@ -188,13 +187,13 @@ fun SettingsScreen(
                                     )
                                     if (profile.isDefault) {
                                         Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceVariant) {
-                                            Text("پیش‌فرض", fontSize = 8.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                            Text("پیش‌فرض", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                                         }
                                     }
                                 }
                                 Text(
                                     if (isSelected) "حساب فعال (تمام اطلاعات تفکیک‌شده است) ✅" else "لمس کنید برای سوییچ به این حساب",
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = if (isSelected) Moss else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -250,7 +249,7 @@ fun SettingsScreen(
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
                     "پالت رنگی و استایل اشرافی اپلیکیشن را بر اساس سلیقه خود تغییر دهید:",
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -285,8 +284,9 @@ fun SettingsScreen(
                                 ) {}
                                 Text(
                                     themeOption.title,
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    ),
                                     color = if (isSelected) GoldVip else MaterialTheme.colorScheme.onSurface
                                 )
                                 if (!isPremium && themeOption != VipColorTheme.TEAL_MOSS) {
@@ -323,8 +323,9 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 scaleOption.title,
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                ),
                                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -367,7 +368,7 @@ fun SettingsScreen(
                     Spacer(Modifier.width(10.dp))
                     Column {
                         Text("ساعت ارسال اعلان‌های یادآوری", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-                        Text("اعلان‌ها با نام حساب مربوطه سر موعد ارسال می‌شوند", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("اعلان‌ها با نام حساب مربوطه سر موعد ارسال می‌شوند", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -376,7 +377,7 @@ fun SettingsScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { vm.setNotificationHour(hour) },
-                            label = { Text("ساعت ${hour.faDigits()}:۰۰", fontSize = 11.sp) },
+                            label = { Text("ساعت ${hour.faDigits()}:۰۰", style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(50),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Moss,
@@ -468,7 +469,7 @@ fun SettingsScreen(
                 }
                 Column(Modifier.weight(1f)) {
                     Text("ارتقا به نسخه طلایی (⭐ VIP)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GoldVip)
-                    Text("گزارش‌گیری PDF و اکسل، هوش مالی و امکانات نامحدود", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("گزارش‌گیری PDF و اکسل، هوش مالی و امکانات نامحدود", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Icon(Icons.Rounded.ChevronLeft, null, tint = GoldVip)
             }
@@ -578,7 +579,7 @@ fun AddProfileDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text("برای این حساب یک نام و آیکون مشخص کنید تا محیطی کاملاً مستقل داشته باشید:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("برای این حساب یک نام و آیکون مشخص کنید تا محیطی کاملاً مستقل داشته باشید:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                 OutlinedTextField(
                     value = name,
@@ -590,7 +591,7 @@ fun AddProfileDialog(
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("انتخاب آیکون حساب:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("انتخاب آیکون حساب:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(emojis) { emoji ->
                             val isSelected = selectedEmoji == emoji
@@ -682,8 +683,9 @@ private fun ThemeOptionChip(
             )
             Text(
                 title,
-                fontSize = 11.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                ),
                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
             )
         }
@@ -708,7 +710,7 @@ private fun SettingsToggleRow(
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-            Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(
             checked = checked,
@@ -757,12 +759,12 @@ private fun SettingsActionRow(
                                 horizontalArrangement = Arrangement.spacedBy(3.dp)
                             ) {
                                 Icon(Icons.Rounded.Star, null, tint = GoldVip, modifier = Modifier.size(11.dp))
-                                Text("VIP", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                                Text("VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                             }
                         }
                     }
                 }
-                Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.Rounded.ChevronLeft, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         }
@@ -793,7 +795,7 @@ private fun WidgetGuideDialog(
             ) {
                 Text(
                     "با قرار دادن ویجت قسط‌یار روی صفحه اصلی گوشی، همیشه از نزدیک‌ترین سررسید اقساط و تعهدات ماهانه باخبر باشید.",
-                    fontSize = 11.5.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -813,30 +815,30 @@ private fun WidgetGuideDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("قسط‌یار • سررسید بعدی", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFA7F3D0))
+                            Text("قسط‌یار • سررسید بعدی", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFFA7F3D0))
                             Surface(
                                 shape = RoundedCornerShape(50),
                                 color = Color(0x33F59E0B)
                             ) {
-                                Text("۳ روز مانده", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFBBF24), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                Text("۳ روز مانده", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Color(0xFFFBBF24), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                             }
                         }
 
-                        Text("وام خرید مسکن", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("۳٬۵۰۰٬۰۰۰ تومان", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF34D399))
+                        Text("وام خرید مسکن", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                        Text("۳٬۵۰۰٬۰۰۰ تومان", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = Color(0xFF34D399))
 
                         HorizontalDivider(color = Color(0x22FFFFFF))
 
-                        Text("تعهد این ماه: ۷٬۲۰۰٬۰۰۰ تومان (۲ قسط فعال)", fontSize = 10.sp, color = Color(0xFF9CA3AF))
+                        Text("تعهد این ماه: ۷٬۲۰۰٬۰۰۰ تومان (۲ قسط فعال)", style = MaterialTheme.typography.labelMedium, color = Color(0xFF9CA3AF))
                     }
                 }
 
                 // راهنمای گام به گام
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("نحوه فعال‌سازی روی گوشی:", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text("۱. انگشت خود را روی فضای خالی صفحه اصلی گوشی نگه دارید.", fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("۲. گزینه «ویجت‌ها / Widgets» را انتخاب کنید.", fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("۳. «قسط‌یار» را پیدا کرده و به صفحه بکشید.", fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("نحوه فعال‌سازی روی گوشی:", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                    Text("۱. انگشت خود را روی فضای خالی صفحه اصلی گوشی نگه دارید.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("۲. گزینه «ویجت‌ها / Widgets» را انتخاب کنید.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("۳. «قسط‌یار» را پیدا کرده و به صفحه بکشید.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         },

@@ -87,7 +87,7 @@ fun LoanPoolSection(
             ) {
                 Column {
                     Text("صندوق‌های وام خانوادگی و همکاران", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("${poolsWithMembers.size.faDigits()} صندوق فعال ثبت شده", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${poolsWithMembers.size.faDigits()} صندوق فعال ثبت شده", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
                 Button(
@@ -99,7 +99,7 @@ fun LoanPoolSection(
                 ) {
                     Icon(Icons.Rounded.Add, null, tint = Color.Black, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("صندوق جدید", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text("صندوق جدید", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = Color.Black)
                 }
             }
 
@@ -169,8 +169,7 @@ fun LoanPoolSection(
             text = {
                 Text(
                     "آیا مطمئن هستید؟ با تایید این مرحله، دور ${poolData.pool.currentRound.faDigits()} پایان یافته و وضعیت واریزی تمام اعضا برای ماه جدید بازنشانی می‌شود.",
-                    fontSize = 12.sp,
-                    lineHeight = 18.sp
+                    style = MaterialTheme.typography.labelLarge
                 )
             },
             confirmButton = {
@@ -259,7 +258,7 @@ private fun RichPoolCardItem(
                         )
                         Text(
                             "سهم ماهانه: ${pool.monthlyAmount.money()} تومان",
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -275,8 +274,7 @@ private fun RichPoolCardItem(
                     ) {
                         Text(
                             "ماه ${pool.currentRound.faDigits()} از ${pool.totalMembers.faDigits()}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = GoldVip,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -306,22 +304,22 @@ private fun RichPoolCardItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(horizontalAlignment = Alignment.Start) {
-                        Text("مبلغ وام برنده این دور:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${pool.winnerPayout.money()} تومان", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                        Text("مبلغ وام برنده این دور:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${pool.winnerPayout.money()} تومان", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                     }
 
                     Box(modifier = Modifier.width(1.dp).height(30.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("جمع‌آوری شده این ماه:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${totalCollected.money()} تومان", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isAllPaid) Color(0xFF10B981) else Moss)
+                        Text("جمع‌آوری شده این ماه:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${totalCollected.money()} تومان", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = if (isAllPaid) Color(0xFF10B981) else Moss)
                     }
 
                     Box(modifier = Modifier.width(1.dp).height(30.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("وضعیت پرداخت:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${paidMembers.size.faDigits()} از ${members.size.faDigits()} نفر", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isAllPaid) Color(0xFF10B981) else Coral)
+                        Text("وضعیت پرداخت:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${paidMembers.size.faDigits()} از ${members.size.faDigits()} نفر", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = if (isAllPaid) Color(0xFF10B981) else Coral)
                     }
                 }
             }
@@ -340,7 +338,7 @@ private fun RichPoolCardItem(
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GoldVip)
                 ) {
-                    Text("🎰 گردونه قرعه‌کشی", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text("🎰 گردونه قرعه‌کشی", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color.Black)
                 }
 
                 FilledTonalButton(
@@ -353,7 +351,7 @@ private fun RichPoolCardItem(
                 ) {
                     Icon(Icons.Rounded.Share, null, modifier = Modifier.size(15.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("گزارش ماه", fontSize = 10.5.sp)
+                    Text("گزارش ماه", style = MaterialTheme.typography.labelMedium)
                 }
 
                 OutlinedButton(
@@ -363,14 +361,14 @@ private fun RichPoolCardItem(
                         .bounceClick(minScale = 0.95f),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("پایان ماه ⏭️", fontSize = 10.5.sp, fontWeight = FontWeight.Bold)
+                    Text("پایان ماه ⏭️", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                 }
             }
 
             // ۴. لیست برندگان ادوار گذشته (در صورت وجود)
             if (wonMembers.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("🏆 برندگان دوره‌های قبل:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                    Text("🏆 برندگان دوره‌های قبل:", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         items(wonMembers.sortedBy { it.wonMonth }) { won: LoanPoolMember ->
                             Surface(
@@ -380,8 +378,7 @@ private fun RichPoolCardItem(
                             ) {
                                 Text(
                                     "دور ${won.wonMonth.faDigits()}: ${won.name}",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.SemiBold,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = GoldVip,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
@@ -400,7 +397,7 @@ private fun RichPoolCardItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("لیست اعضا و وضعیت واریز ماه جاری:", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("لیست اعضا و وضعیت واریز ماه جاری:", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Icon(if (expandedMembers) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
@@ -429,18 +426,17 @@ private fun RichPoolCardItem(
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(
                                                     if (member.hasWon) "🏆" else "${(index + 1).faDigits()}",
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Bold
+                                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                                                 )
                                             }
                                         }
 
                                         Column {
-                                            Text(member.name, fontSize = 12.5.sp, fontWeight = FontWeight.Bold)
+                                            Text(member.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                                             if (member.hasWon) {
-                                                Text("برنده دور ${member.wonMonth.faDigits()}", fontSize = 9.5.sp, color = GoldVip, fontWeight = FontWeight.SemiBold)
+                                                Text("برنده دور ${member.wonMonth.faDigits()}", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = GoldVip)
                                             } else if (member.phone.isNotBlank()) {
-                                                Text(member.phone, fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Text(member.phone, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
                                     }
@@ -467,8 +463,7 @@ private fun RichPoolCardItem(
                                             label = {
                                                 Text(
                                                     if (member.paidThisMonth) "پرداخت شد ✅" else "در انتظار ⏳",
-                                                    fontSize = 10.5.sp,
-                                                    fontWeight = FontWeight.Bold
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                                                 )
                                             },
                                             shape = RoundedCornerShape(50),
@@ -521,10 +516,9 @@ private fun EmptyPoolsView(onCreatePool: () -> Unit) {
             Text("صندوق‌های وام و قرعه‌کشی خانوادگی", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text(
                 "صندوق‌های قرعه‌کشی دوره‌ای با دوستان، فامیل یا همکاران را ثبت کنید تا واریزی‌ها و قرعه‌کشی گردونه شانس هر ماه به صورت هوشمند و شفاف انجام شود.",
-                fontSize = 11.5.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                lineHeight = 18.sp
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(4.dp))
             Button(
@@ -575,7 +569,7 @@ private fun LotteryWheelDialog(
                 )
 
                 if (eligibleMembers.isEmpty()) {
-                    Text("تمامی اعضای این صندوق قبلاً برنده شده‌اند! دوره با موفقیت به پایان رسیده است.", fontSize = 12.sp, textAlign = TextAlign.Center)
+                    Text("تمامی اعضای این صندوق قبلاً برنده شده‌اند! دوره با موفقیت به پایان رسیده است.", style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
                 } else {
                     Box(
                         modifier = Modifier
@@ -625,9 +619,9 @@ private fun LotteryWheelDialog(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text("برنده خوش‌شانس این دور: 🎉", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(winner.name, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = GoldVip)
-                                Text("مبلغ وام: ${poolData.pool.winnerPayout.money()} تومان", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold)
+                                Text("برنده خوش‌شانس این دور: 🎉", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(winner.name, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = GoldVip)
+                                Text("مبلغ وام: ${poolData.pool.winnerPayout.money()} تومان", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold))
                             }
                         }
                     }
@@ -754,8 +748,8 @@ private fun AddLoanPoolDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("تعداد اعضا: ${parsedMembers.size.faDigits()} نفر", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = GoldVip)
-                        Text("مبلغ وام برنده هر ماه: ${(parsedMembers.size * monthly).money()} تومان", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                        Text("تعداد اعضا: ${parsedMembers.size.faDigits()} نفر", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = GoldVip)
+                        Text("مبلغ وام برنده هر ماه: ${(parsedMembers.size * monthly).money()} تومان", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                     }
                 }
             }

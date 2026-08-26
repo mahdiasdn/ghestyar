@@ -438,7 +438,7 @@ private fun ServicesGridHub(
                     )
                     Text(
                         "جعبه‌ابزار هوشمند، محاسبات VIP و خدمات ویژه قسط‌یار",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -531,8 +531,7 @@ private fun ServiceGridCard(
                 ) {
                     Text(
                         item.badge,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = if (item.isVip) GoldVip else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                     )
@@ -542,15 +541,13 @@ private fun ServiceGridCard(
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(
                     item.title,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     item.description,
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 14.sp,
                     maxLines = 2
                 )
             }
@@ -562,8 +559,7 @@ private fun ServiceGridCard(
             ) {
                 Text(
                     "ورود",
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = if (item.isVip) GoldVip else Moss
                 )
                 Spacer(Modifier.width(2.dp))
@@ -626,11 +622,11 @@ private fun ServiceDedicatedWindow(
                         )
                         if (window.isVip) {
                             Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.2f)) {
-                                Text("⭐ VIP", fontSize = 8.5.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp))
+                                Text("⭐ VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp))
                             }
                         }
                     }
-                    Text("مرکز ابزارها و خدمات ویژه", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("مرکز ابزارها و خدمات ویژه", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -644,7 +640,7 @@ private fun ServiceDedicatedWindow(
                 ) {
                     Icon(Icons.Rounded.Add, null, modifier = Modifier.size(16.dp), tint = Color.Black)
                     Spacer(Modifier.width(4.dp))
-                    Text("هدف جدید", fontWeight = FontWeight.Bold, fontSize = 11.5.sp, color = Color.Black)
+                    Text("هدف جدید", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color.Black)
                 }
             }
         }
@@ -768,8 +764,7 @@ private fun GoalCard(
                             ) {
                                 Text(
                                     "تکمیل شد 🎉",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     color = Color(0xFF10B981),
                                     maxLines = 1,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -780,7 +775,7 @@ private fun GoalCard(
 
                     Text(
                         if (isPrivacy) "هدف: ••••••" else "هدف: ${goal.targetAmount.money()} تومان",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -793,8 +788,7 @@ private fun GoalCard(
                 ) {
                     Text(
                         "${percentInt.faDigits()}٪",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = if (goal.isCompleted) Color(0xFF10B981) else GoldVip,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -859,16 +853,14 @@ private fun GoalCard(
                 ) {
                     Text(
                         if (isPrivacy) "پس‌انداز: ••••••" else "ذخیره: ${goal.currentAmount.money()} ت",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = if (goal.isCompleted) Color(0xFF10B981) else (if (isDark) MossLight else Moss)
                     )
 
                     if (!goal.isCompleted) {
                         Text(
                             if (isPrivacy) "مانده: ••••••" else "مانده: ${remainingAmount.money()} ت",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -905,8 +897,7 @@ private fun GoalCard(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         if (goal.isCompleted) "افزایش بیشتر پس‌انداز ✨" else "واریز وجه به قلک 🪙",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
@@ -953,7 +944,7 @@ private fun EmptyGoalView(onAddGoal: () -> Unit) {
             Text("هنوز قلک هدفی تعریف نکردی!", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Text(
                 "برای خرید گوشی، سفر، طلا یا خودرو قلک هدف بساز و پس‌اندازت را ثبت کن.",
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
@@ -1023,8 +1014,7 @@ private fun DepositBottomSheet(
                         Text("✍️", fontSize = 12.sp)
                         Text(
                             "معادل: ${amount.toPersianWords("تومان")}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                             color = Moss
                         )
                     }
@@ -1039,7 +1029,7 @@ private fun DepositBottomSheet(
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(2.dp)
                     ) {
-                        Text("${(quickVal / 1000).faDigits()} هـ", fontSize = 10.sp)
+                        Text("${(quickVal / 1000).faDigits()} هـ", style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }

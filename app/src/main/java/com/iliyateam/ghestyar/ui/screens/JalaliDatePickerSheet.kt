@@ -83,7 +83,7 @@ fun JalaliDatePickerSheet(
                             jm = next.jm
                             jd = next.jd
                         },
-                        label = { Text("سر ماه آینده", fontSize = 11.sp) }
+                        label = { Text("سر ماه آینده", style = MaterialTheme.typography.labelMedium) }
                     )
                 }
                 item {
@@ -94,7 +94,7 @@ fun JalaliDatePickerSheet(
                             jm = next.jm
                             jd = next.jd
                         },
-                        label = { Text("۱۵ روز بعد", fontSize = 11.sp) }
+                        label = { Text("۱۵ روز بعد", style = MaterialTheme.typography.labelMedium) }
                     )
                 }
                 item {
@@ -105,7 +105,7 @@ fun JalaliDatePickerSheet(
                             jm = next.jm
                             jd = next.jd
                         },
-                        label = { Text("یک ماه بعد", fontSize = 11.sp) }
+                        label = { Text("یک ماه بعد", style = MaterialTheme.typography.labelMedium) }
                     )
                 }
                 item {
@@ -116,7 +116,7 @@ fun JalaliDatePickerSheet(
                             jm = today.jm
                             jd = today.jd
                         },
-                        label = { Text("امروز", fontSize = 11.sp) }
+                        label = { Text("امروز", style = MaterialTheme.typography.labelMedium) }
                     )
                 }
             }

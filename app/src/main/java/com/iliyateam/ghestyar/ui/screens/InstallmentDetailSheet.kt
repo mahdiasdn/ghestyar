@@ -118,15 +118,14 @@ fun InstallmentDetailSheet(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (item.destination.isNotBlank()) {
-                                Text("•", fontSize = 11.sp, color = MaterialTheme.colorScheme.outlineVariant)
+                                Text("•", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outlineVariant)
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
                                     color = if (isDark) MaterialTheme.colorScheme.surfaceContainerHighest else MintSoft
                                 ) {
                                     Text(
                                         "🏦 ${item.destination}",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Medium,
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                                         color = if (isDark) MossLight else Moss,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
@@ -169,11 +168,10 @@ fun InstallmentDetailSheet(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 "${((item.overallProgress * 100).toInt()).faDigits()}٪",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                                 color = if (isDark) MossLight else Moss
                             )
-                            Text("پیشرفت", fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("پیشرفت", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -181,7 +179,7 @@ fun InstallmentDetailSheet(
                         Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("مبلغ هر قسط", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("مبلغ هر قسط", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(
                             "${item.amount.money()} تومان",
                             style = MaterialTheme.typography.titleLarge,
@@ -195,15 +193,14 @@ fun InstallmentDetailSheet(
                         ) {
                             Text(
                                 "قسط پرداخت‌شده: ${item.paidSessions.faDigits()} از ${item.totalSessions.faDigits()}",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                                 color = if (isDark) MossLight else MossDeep,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                         Text(
                             "شروع: ${start.formatJalali()}",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -290,7 +287,7 @@ fun InstallmentDetailSheet(
                                         if (isPaid) {
                                             Icon(Icons.Rounded.Check, null, tint = if (isDark) Color(0xFF003739) else Color.White, modifier = Modifier.size(16.dp))
                                         } else if (isCurrent) {
-                                            Text("${s.faDigits()}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (isDark) MossLight else Moss)
+                                            Text("${s.faDigits()}", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (isDark) MossLight else Moss)
                                         }
                                     }
                                 }
@@ -298,8 +295,9 @@ fun InstallmentDetailSheet(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         "قسط ${s.faDigits()} — ${sessionDue.formatJalali()}",
-                                        fontSize = 12.sp,
-                                        fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                        ),
                                         color = if (isCurrent) (if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else MossDeep) else MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1
                                     )
@@ -327,15 +325,14 @@ fun InstallmentDetailSheet(
                                             horizontalArrangement = Arrangement.spacedBy(3.dp)
                                         ) {
                                             Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, tint = Coral, modifier = Modifier.size(12.dp))
-                                            Text("لغو پرداخت", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Coral)
+                                            Text("لغو پرداخت", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Coral)
                                         }
                                     }
                                 }
 
                                 Text(
                                     "${item.amount.money()} ت",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     color = if (isCurrent) Moss else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -353,7 +350,7 @@ fun InstallmentDetailSheet(
                 ) {
                     Text(
                         "📝 یادداشت: ${item.note}",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(14.dp)
                     )
@@ -380,7 +377,7 @@ fun InstallmentDetailSheet(
                             .height(52.dp)
                             .bounceClick(minScale = 0.96f)
                     ) {
-                        Text("پرداخت این قسط ✅", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
+                        Text("پرداخت این قسط ✅", color = Color.White, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                     }
                 }
 
@@ -400,7 +397,7 @@ fun InstallmentDetailSheet(
                     ) {
                         Icon(Icons.AutoMirrored.Rounded.Undo, null, modifier = Modifier.size(15.dp), tint = Coral)
                         Spacer(Modifier.width(4.dp))
-                        Text("بازگردانی پرداخت ↩️", color = Coral, fontWeight = FontWeight.Bold, fontSize = 11.5.sp)
+                        Text("بازگردانی پرداخت ↩️", color = Coral, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                     }
                 }
 
@@ -459,11 +456,10 @@ private fun BentoStatPill(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 value,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = valueColor,
                 textAlign = TextAlign.Center
             )

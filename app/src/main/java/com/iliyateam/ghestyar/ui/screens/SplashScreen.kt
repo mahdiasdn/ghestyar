@@ -172,7 +172,7 @@ fun SplashScreen(onFinish: () -> Unit) {
 
                 Text(
                     "در حال بارگذاری اطلاعات...",
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -192,8 +192,7 @@ fun SplashScreen(onFinish: () -> Unit) {
             ) {
                 Text(
                     "نسخه ۱.۰",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = Moss,
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp)
                 )

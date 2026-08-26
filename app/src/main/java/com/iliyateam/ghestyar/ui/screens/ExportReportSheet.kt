@@ -107,7 +107,7 @@ fun ExportReportSheet(
                     }
                     Column {
                         Text("خروجی و گزارش‌گیری رسمی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("خروجی تفکیک‌شده در قالب PDF و اکسل", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("خروجی تفکیک‌شده در قالب PDF و اکسل", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -148,7 +148,7 @@ fun ExportReportSheet(
                                 fontWeight = FontWeight.Bold,
                                 color = if (isPdfFormat) Moss else MaterialTheme.colorScheme.onSurface
                             )
-                            Text("A4 مصور با جدول و سربرگ", fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("A4 مصور با جدول و سربرگ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -174,7 +174,7 @@ fun ExportReportSheet(
                                 fontWeight = FontWeight.Bold,
                                 color = if (!isPdfFormat) GoldVip else MaterialTheme.colorScheme.onSurface
                             )
-                            Text("فرمت مایکروسافت اکسل، رنگی و فرمول‌دار", fontSize = 8.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("فرمت مایکروسافت اکسل، رنگی و فرمول‌دار", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -204,8 +204,9 @@ fun ExportReportSheet(
                                 Text(filter.emoji, fontSize = 13.sp)
                                 Text(
                                     filter.title,
-                                    fontSize = 11.5.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    ),
                                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -229,9 +230,9 @@ fun ExportReportSheet(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("پیش‌نمایش داده‌های گزارش:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("پیش‌نمایش داده‌های گزارش:", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Surface(shape = RoundedCornerShape(50), color = Moss.copy(alpha = 0.12f)) {
-                            Text("${filteredItems.size.faDigits()} قسط منتخب", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Moss, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+                            Text("${filteredItems.size.faDigits()} قسط منتخب", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Moss, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
                         }
                     }
 
@@ -240,15 +241,15 @@ fun ExportReportSheet(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("مجموع تعهدات:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("مجموع تعهدات:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${totalSum.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("پرداخت‌شده:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("پرداخت‌شده:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${paidSum.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Moss)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("مانده بدهی:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("مانده بدهی:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${remainingSum.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Coral)
                         }
                     }
@@ -282,7 +283,7 @@ fun ExportReportSheet(
                 ) {
                     Icon(Icons.Rounded.Share, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("اشتراک مستقیم", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("اشتراک مستقیم", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
                 // دکمه ذخیره فایل در حافظه
@@ -306,8 +307,7 @@ fun ExportReportSheet(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "ذخیره در حافظه",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = if (isPdfFormat) Color.White else Color.Black
                     )
                 }

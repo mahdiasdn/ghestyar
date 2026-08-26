@@ -145,8 +145,7 @@ fun PremiumSheet(
                                         ) {
                                             Text(
                                                 badge,
-                                                fontSize = 9.sp,
-                                                fontWeight = FontWeight.Bold,
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                 color = GoldVip,
                                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                             )
@@ -155,7 +154,7 @@ fun PremiumSheet(
                                 }
                                 Text(
                                     tier.durationText,
-                                    fontSize = 11.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -273,12 +272,12 @@ fun PremiumSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = { onUnlock(selectedTier) }) {
-                    Text("فعال‌سازی آنی (حالت دمو/تست)", fontSize = 11.sp, color = Moss)
+                    Text("فعال‌سازی آنی (حالت دمو/تست)", style = MaterialTheme.typography.labelMedium, color = Moss)
                 }
 
                 if (isCurrentlyPremium) {
                     TextButton(onClick = onResetFree) {
-                        Text("بازگشت به نسخه رایگان", fontSize = 11.sp, color = Coral)
+                        Text("بازگشت به نسخه رایگان", style = MaterialTheme.typography.labelMedium, color = Coral)
                     }
                 }
             }

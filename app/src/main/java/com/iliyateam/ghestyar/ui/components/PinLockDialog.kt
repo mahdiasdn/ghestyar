@@ -155,7 +155,7 @@ fun PinLockDialog(
                 }
 
                 errorMessage?.let { msg ->
-                    Text(msg, color = Coral, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(msg, color = Coral, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
                 Spacer(Modifier.height(4.dp))
@@ -203,8 +203,7 @@ fun PinLockDialog(
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(
                                                     item.faDigits(),
-                                                    fontSize = 24.sp,
-                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                             }
@@ -218,7 +217,7 @@ fun PinLockDialog(
 
                 if (isSettingMode) {
                     TextButton(onClick = onDismiss) {
-                        Text("انصراف", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("انصراف", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

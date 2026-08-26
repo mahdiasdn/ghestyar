@@ -186,7 +186,7 @@ fun HomeScreen(
                             )
                             Text(
                                 "${activeInstallments.size.faDigits()} قسط • ${pendingCheques.size.faDigits()} چک در انتظار • ${Jalali.months[JalaliDate.today().jm - 1]} ${JalaliDate.today().jy.faDigits()}",
-                                fontSize = 11.sp,
+                                style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -248,34 +248,36 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 2.dp),
-                        placeholder = {
-                            Text(if (mainSectionTab == 0) "جستجو در عنوان و مقصد اقساط..." else "جستجو در چک‌ها، نام طرف حساب و بانک...")
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
+                        placeholder = { Text("جستجو در عنوان، بانک، توضیحات...") },
+                        leadingIcon = { Icon(Icons.Rounded.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                         trailingIcon = {
                             if (searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { vm.setSearch("") }) {
-                                    Icon(Icons.Rounded.Clear, null)
+                                    Icon(Icons.Rounded.Close, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                        }
+                        },
+                        shape = RoundedCornerShape(18.dp),
+                        singleLine = true
                     )
                 }
             }
 
-            // ۲. سوئیچر سگمنتی اصلی (اقساط و وام‌ها / چک‌ها و مطالبات)
+            // ۲. سوییچر اصلی بالای صفحه: تب اقساط و وام‌ها VS چک‌ها و مطالبات
             item {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(5.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         val mainTabs = listOf(
                             0 to ("اقساط و وام‌ها (${activeInstallments.size.faDigits()})" to Icons.AutoMirrored.Rounded.ReceiptLong),
@@ -307,8 +309,9 @@ fun HomeScreen(
                                     Spacer(Modifier.width(6.dp))
                                     Text(
                                         text = title,
-                                        fontSize = 12.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                        ),
                                         color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -371,8 +374,9 @@ fun HomeScreen(
                                     ) {
                                         Text(
                                             text = title,
-                                            fontSize = 12.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            style = MaterialTheme.typography.labelLarge.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                            ),
                                             color = if (isSelected) (if (isDark) MossLight else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant,
                                             textAlign = TextAlign.Center,
                                             modifier = Modifier.padding(vertical = 8.dp)
@@ -394,7 +398,7 @@ fun HomeScreen(
                             FilterChip(
                                 selected = selectedCategory == null,
                                 onClick = { vm.setCategoryFilter(null) },
-                                label = { Text("همه دسته‌ها", fontSize = 11.sp) },
+                                label = { Text("همه دسته‌ها", style = MaterialTheme.typography.labelMedium) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Moss,
@@ -408,7 +412,7 @@ fun HomeScreen(
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { vm.setCategoryFilter(if (isSelected) null else cat.id) },
-                                label = { Text("${cat.emoji} ${cat.title}", fontSize = 11.sp) },
+                                label = { Text("${cat.emoji} ${cat.title}", style = MaterialTheme.typography.labelMedium) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Moss,
@@ -444,7 +448,7 @@ fun HomeScreen(
                                 )
                                 Text(
                                     "برای ثبت و مدیریت منظم وام‌ها و اقساط خود، دکمه افزودن را بزنید.",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
                                 )
@@ -501,7 +505,7 @@ fun HomeScreen(
                             border = BorderStroke(1.dp, Coral.copy(alpha = 0.3f))
                         ) {
                             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("مجموع بدهی‌های چکی", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("مجموع بدهی‌های چکی", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
                                     if (isPrivacyMode) "••••••" else "${totalPayableCheques.money()} ت",
                                     style = MaterialTheme.typography.titleMedium,
@@ -520,7 +524,7 @@ fun HomeScreen(
                             border = BorderStroke(1.dp, ChequeBlue.copy(alpha = 0.3f))
                         ) {
                             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("مجموع مطالبات و طلب‌ها", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("مجموع مطالبات و طلب‌ها", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
                                     if (isPrivacyMode) "••••••" else "${totalReceivableCheques.money()} ت",
                                     style = MaterialTheme.typography.titleMedium,
@@ -545,7 +549,7 @@ fun HomeScreen(
                             FilterChip(
                                 selected = selected,
                                 onClick = { chequeFilterType = idx },
-                                label = { Text(label, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                                label = { Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = if (idx == 1) ChequeBlue else Moss,
@@ -580,7 +584,7 @@ fun HomeScreen(
                                 )
                                 Text(
                                     "چک‌های صیادی و طلب‌ها یا بدهی‌های شخصی‌ات را اینجا ثبت و رهگیری کن.",
-                                    fontSize = 11.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
                                 )
@@ -784,8 +788,7 @@ private fun ChequeRowItem(
                     ) {
                         Text(
                             text = if (item.isReceivable) "طلبکاریم" else "بدهکاریم",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = if (item.isReceivable) ChequeBlue else MaterialTheme.colorScheme.onErrorContainer,
                             maxLines = 1,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -793,7 +796,7 @@ private fun ChequeRowItem(
                     }
                     Text(
                         text = "طرف: ${item.personName} • موعد: ${due.formatJalali()}",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -910,7 +913,7 @@ private fun AddOrEditChequeDialog(
                     color = if (isCheque) Moss else Color.Transparent
                 ) {
                     Box(modifier = Modifier.padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                        Text("چک صیادی ✍️", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (isCheque) Color.White else MaterialTheme.colorScheme.onSurface)
+                        Text("چک صیادی ✍️", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = if (isCheque) Color.White else MaterialTheme.colorScheme.onSurface)
                     }
                 }
                 Surface(
@@ -920,7 +923,7 @@ private fun AddOrEditChequeDialog(
                     color = if (!isCheque) Moss else Color.Transparent
                 ) {
                     Box(modifier = Modifier.padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                        Text("قرض شخصی 🤝", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (!isCheque) Color.White else MaterialTheme.colorScheme.onSurface)
+                        Text("قرض شخصی 🤝", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = if (!isCheque) Color.White else MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -933,14 +936,14 @@ private fun AddOrEditChequeDialog(
                 FilterChip(
                     selected = !isReceivable,
                     onClick = { isReceivable = false },
-                    label = { Text("بدهکاریم (پرداختی)", fontSize = 11.sp) },
+                    label = { Text("بدهکاریم (پرداختی)", style = MaterialTheme.typography.labelMedium) },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.weight(1f)
                 )
                 FilterChip(
                     selected = isReceivable,
                     onClick = { isReceivable = true },
-                    label = { Text("طلبکاریم (دریافتی)", fontSize = 11.sp) },
+                    label = { Text("طلبکاریم (دریافتی)", style = MaterialTheme.typography.labelMedium) },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.weight(1f)
                 )
@@ -997,8 +1000,7 @@ private fun AddOrEditChequeDialog(
                         Text("✍️", fontSize = 12.sp)
                         Text(
                             "معادل: ${amount.toPersianWords("تومان")}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                             color = if (isReceivable) Moss else Coral
                         )
                     }
@@ -1017,7 +1019,7 @@ private fun AddOrEditChequeDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("تاریخ سررسید:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("تاریخ سررسید:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(due.toLocalDate().formatJalali(), fontWeight = FontWeight.Bold, color = Moss)
                 }
             }
@@ -1084,8 +1086,7 @@ private fun HeroDebtSummaryCard(
                 Text(
                     "مانده کل بدهی اقساط",
                     color = Color.White.copy(alpha = 0.82f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
                 )
                 Spacer(Modifier.height(4.dp))
                 AnimatedMoneyText(
@@ -1121,15 +1122,14 @@ private fun HeroDebtSummaryCard(
                     Text(
                         "پرداخت شده ${stats.overallHealthPercentage.toInt().faDigits()}٪",
                         color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
                     )
 
                     if (totalCount > 0) {
                         Text(
                             "قسط ${paidCount.faDigits()} از ${totalCount.faDigits()}",
                             color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 11.sp
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
@@ -1204,9 +1204,8 @@ private fun NextDueTonalCard(active: List<Installment>) {
                         daysLeft == 0L -> "امروز موعد پرداخت است (${due.formatJalali()}) ⚠️"
                         else -> "${(-daysLeft).toInt().faDigits()} روز تاخیر! (${due.formatJalali()}) 🚨"
                     },
-                    fontSize = 10.5.sp,
-                    color = if (daysLeft < 0) Coral else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                    color = if (daysLeft < 0) Coral else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

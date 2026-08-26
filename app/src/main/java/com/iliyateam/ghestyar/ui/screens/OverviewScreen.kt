@@ -106,7 +106,7 @@ fun OverviewScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Text(LocalDate.now().formatJalaliWithWeekday(), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(LocalDate.now().formatJalaliWithWeekday(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -120,7 +120,7 @@ fun OverviewScreen(
             ) {
                 Icon(Icons.Rounded.Calculate, null, tint = Moss, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("ماشین‌حساب وام", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("ماشین‌حساب وام", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
             }
         }
 
@@ -165,8 +165,9 @@ fun OverviewScreen(
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 title,
-                                fontSize = 11.5.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                ),
                                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -247,8 +248,7 @@ fun OverviewScreen(
                         listOf("ش", "ی", "د", "س", "چ", "پ", "ج").forEach { wd ->
                             Text(
                                 wd,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = if (wd == "ج") Coral else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.width(36.dp),
                                 textAlign = TextAlign.Center
@@ -320,8 +320,7 @@ fun OverviewScreen(
                         ) {
                             Text(
                                 "${(dayInstallments.size + dayCheques.size + dayGoals.size).faDigits()} مورد",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Moss,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
@@ -345,7 +344,7 @@ fun OverviewScreen(
                             Text("✨", fontSize = 22.sp)
                             Column {
                                 Text("هیچ سررسیدی در این تاریخ ثبت نشده است.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-                                Text("برای این روز پرداختی یا موعد چکی نداری.", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("برای این روز پرداختی یا موعد چکی نداری.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -378,10 +377,10 @@ fun OverviewScreen(
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                             Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                             Surface(shape = RoundedCornerShape(50), color = Moss.copy(alpha = 0.12f)) {
-                                                Text("قسط", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Moss, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                                Text("قسط", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = Moss, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                                             }
                                         }
-                                        Text("قسط ${(item.paidSessions + 1).faDigits()} از ${item.totalSessions.faDigits()}", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text("قسط ${(item.paidSessions + 1).faDigits()} از ${item.totalSessions.faDigits()}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     Text(if (isPrivacyMode) "••••••" else "${item.amount.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Moss)
                                 }
@@ -416,10 +415,10 @@ fun OverviewScreen(
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                             Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                             Surface(shape = RoundedCornerShape(50), color = ChequeBlue.copy(alpha = 0.12f)) {
-                                                Text(if (item.isCheque) "چک صیادی" else "قرض/طلب", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = ChequeBlue, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                                Text(if (item.isCheque) "چک صیادی" else "قرض/طلب", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = ChequeBlue, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                                             }
                                         }
-                                        Text("طرف حساب: ${item.personName}", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text("طرف حساب: ${item.personName}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     Text(if (isPrivacyMode) "••••••" else "${item.amount.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (item.isReceivable) ChequeBlue else Coral)
                                 }
@@ -454,10 +453,10 @@ fun OverviewScreen(
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                             Text(item.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                             Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.12f)) {
-                                                Text("هدف پس‌انداز", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = GoldVip, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                                Text("هدف پس‌انداز", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                                             }
                                         }
-                                        Text("مبلغ هدف: ${item.targetAmount.money()} تومان", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text("مبلغ هدف: ${item.targetAmount.money()} تومان", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     Text("${item.currentAmount.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = GoldVip)
                                 }
@@ -551,7 +550,7 @@ private fun DashboardFinancialSummaryHub(
                                 )
                                 Text(
                                     "کسر تمام مخارج، اقساط و چک‌ها از درآمدها",
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -564,8 +563,7 @@ private fun DashboardFinancialSummaryHub(
                         ) {
                             Text(
                                 if (isPositive) "تراز مثبت ماه 📈" else "کسری بودجه 📉",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = if (isPositive) Moss else Coral,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
@@ -587,8 +585,7 @@ private fun DashboardFinancialSummaryHub(
                         if (!isPrivacy) {
                             Text(
                                 "تومان",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
@@ -610,20 +607,17 @@ private fun DashboardFinancialSummaryHub(
                         ) {
                             Text(
                                 text = if (isPrivacy) "ورودی‌ها: ••••••" else "کل ورودی: ${totalInflow.money()} ت",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Moss
                             )
                             Text(
                                 text = "—",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = if (isPrivacy) "تعهدات: ••••••" else "کل خروجی: ${totalOutflow.money()} ت",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Coral
                             )
                         }
@@ -719,10 +713,10 @@ private fun OverviewStatCard(
                         Icon(icon, null, tint = tint, modifier = Modifier.size(16.dp))
                     }
                 }
-                Text(subText, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = tint)
+                Text(subText, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = tint)
             }
 
-            Text(title, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 value,
                 style = MaterialTheme.typography.titleSmall,
@@ -866,8 +860,9 @@ private fun CalendarDayCell(
         ) {
             Text(
                 day.faDigits(),
-                fontSize = 12.sp,
-                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
+                ),
                 color = when {
                     isSelected -> MaterialTheme.colorScheme.onPrimary
                     isFriday -> Coral
@@ -904,7 +899,7 @@ private fun CalendarDayCell(
 private fun DotLegend(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(Modifier.size(6.dp).clip(CircleShape).background(color))
-        Text(label, fontSize = 9.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

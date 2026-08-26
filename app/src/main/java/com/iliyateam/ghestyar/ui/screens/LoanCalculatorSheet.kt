@@ -100,7 +100,7 @@ fun LoanCalculatorSheet(
                     )
                     Text(
                         "محاسبه بر اساس فرمول رسمی بانک مرکزی ایران",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -140,8 +140,7 @@ fun LoanCalculatorSheet(
                         Text("✍️", fontSize = 12.sp)
                         Text(
                             "معادل: ${principal.toPersianWords("تومان")}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                             color = Moss
                         )
                     }
@@ -159,8 +158,7 @@ fun LoanCalculatorSheet(
                     ) {
                         Text(
                             "${(quickVal / 1_000_000).faDigits()} م تومان",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                         )
@@ -181,7 +179,7 @@ fun LoanCalculatorSheet(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedPreset = preset },
-                            label = { Text(preset.title, fontSize = 11.sp) },
+                            label = { Text(preset.title, style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(50),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Moss,
@@ -256,7 +254,7 @@ fun LoanCalculatorSheet(
                             if (calculation.monthlyPayment > 0) {
                                 Text(
                                     calculation.monthlyPayment.toPersianWords("تومان"),
-                                    fontSize = 9.5.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -269,16 +267,16 @@ fun LoanCalculatorSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("کل سود پرداختی به بانک:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${calculation.totalInterest.money()} تومان", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Coral)
+                        Text("کل سود پرداختی به بانک:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${calculation.totalInterest.money()} تومان", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Coral)
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("مجموع کل بازپرداخت (اصل + سود):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${calculation.totalRepayment.money()} تومان", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                        Text("مجموع کل بازپرداخت (اصل + سود):", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${calculation.totalRepayment.money()} تومان", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                     }
                 }
             }
@@ -301,7 +299,7 @@ fun LoanCalculatorSheet(
             ) {
                 Icon(Icons.Rounded.AddCircle, null, modifier = Modifier.size(18.dp), tint = Color.White)
                 Spacer(Modifier.width(6.dp))
-                Text("افزودن این قسط به لیست اقساط من ✅", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("افزودن این قسط به لیست اقساط من ✅", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
             }
         }
     }

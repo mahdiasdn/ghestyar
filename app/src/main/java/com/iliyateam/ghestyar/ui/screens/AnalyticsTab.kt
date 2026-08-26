@@ -125,7 +125,7 @@ fun AnalyticsTab(
                             }
                             Column {
                                 Text("کارنامه سلامت مالی و رتبه اعتباری", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                Text("محاسبه هوشمند بر اساس رفتار تسویه", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("محاسبه هوشمند بر اساس رفتار تسویه", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
 
@@ -168,11 +168,10 @@ fun AnalyticsTab(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     healthScore.faDigits(),
-                                    fontSize = 17.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                     color = scoreGrade.second
                                 )
-                                Text("از ۱۰۰۰", fontSize = 8.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("از ۱۰۰۰", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
 
@@ -189,7 +188,6 @@ fun AnalyticsTab(
                                     else -> "اقساط معوق یا بار تعهدات سنگین است. پیشنهاد می‌شود از استراتژی تسویه زودهنگام استفاده کنید."
                                 },
                                 style = MaterialTheme.typography.bodySmall,
-                                fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -268,8 +266,7 @@ fun AnalyticsTab(
                         Surface(shape = RoundedCornerShape(50), color = Moss.copy(alpha = 0.15f)) {
                             Text(
                                 if (activeInstallments.isEmpty()) "آزاد و رها ✨" else "${daysUntilFreedom.faDigits()} روز دیگر",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Moss,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
                             )
@@ -290,7 +287,7 @@ fun AnalyticsTab(
                                 Text("🎉", fontSize = 28.sp)
                                 Column {
                                     Text("تبریک! شما در حال حاضر هیچ قسط فعالی ندارید.", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = Moss)
-                                    Text("۱۰۰٪ درآمدهای شما بدون تعهد بدهی در اختیار خودتان است.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("۱۰۰٪ درآمدهای شما بدون تعهد بدهی در اختیار خودتان است.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
@@ -301,11 +298,11 @@ fun AnalyticsTab(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("تاریخ پیش‌بینی اتمام تمام اقساط:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("تاریخ پیش‌بینی اتمام تمام اقساط:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(freedomDateJalali, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                             }
                             Column(horizontalAlignment = Alignment.End) {
-                                Text("مانده کل تعهدات:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("مانده کل تعهدات:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text("${stats.totalActiveDebt.money()} تومان", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Coral)
                             }
                         }
@@ -320,8 +317,8 @@ fun AnalyticsTab(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("پیشرفت مسیر تسویه کل وام‌ها", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("${(progressRatio * 100).toInt().faDigits()}٪ تسویه شده", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Moss)
+                                Text("پیشرفت مسیر تسویه کل وام‌ها", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${(progressRatio * 100).toInt().faDigits()}٪ تسویه شده", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Moss)
                             }
                             LinearProgressIndicator(
                                 progress = { progressRatio },
@@ -392,8 +389,8 @@ private fun HealthMetricChip(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Text(title, fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(value, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (isGood) Moss else Coral)
+            Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (isGood) Moss else Coral)
         }
     }
 }
@@ -448,11 +445,11 @@ private fun FutureCommitmentProjectionSection(activeInstallments: List<Installme
                     Text("📊", fontSize = 18.sp)
                     Text("پیش‌بینی بار تعهدات ۶ ماه آینده", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
-                Text("تومان", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("تومان", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             if (activeInstallments.isEmpty()) {
-                Text("اقساط فعالی برای پیش‌بینی ماه‌های آینده وجود ندارد.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("اقساط فعالی برای پیش‌بینی ماه‌های آینده وجود ندارد.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
                 Row(
                     modifier = Modifier
@@ -477,8 +474,7 @@ private fun FutureCommitmentProjectionSection(activeInstallments: List<Installme
                         ) {
                             Text(
                                 if (amount > 0) amount.compactMoney() else "-",
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = if (isCurrentMonth) Moss else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(Modifier.height(4.dp))
@@ -496,8 +492,9 @@ private fun FutureCommitmentProjectionSection(activeInstallments: List<Installme
                             Spacer(Modifier.height(6.dp))
                             Text(
                                 monthName,
-                                fontSize = 10.sp,
-                                fontWeight = if (isCurrentMonth) FontWeight.Bold else FontWeight.Normal,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isCurrentMonth) FontWeight.Bold else FontWeight.Normal
+                                ),
                                 color = if (isCurrentMonth) Moss else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -626,14 +623,14 @@ private fun EarlyPayoffSimulatorSection(
                         horizontalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         Icon(Icons.Rounded.Star, null, tint = GoldVip, modifier = Modifier.size(11.dp))
-                        Text("گلوله برفی ⭐ VIP", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                        Text("گلوله برفی ⭐ VIP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                     }
                 }
             }
 
             Text(
                 "با پرداخت ماهیانه مبلغی مازاد، استراتژی گلوله برفی زمان تسویه تمام وام‌های شما را کوتاه‌تر می‌کند:",
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -645,7 +642,7 @@ private fun EarlyPayoffSimulatorSection(
                 ) {
                     Text(
                         "در حال حاضر قسط فعالی برای محاسبه شبیه‌ساز ثبت نشده است.",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(14.dp)
                     )
@@ -657,8 +654,8 @@ private fun EarlyPayoffSimulatorSection(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("مبلغ مازاد ماهیانه:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("+${extraMonthlyPay.toLong().money()} تومان", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = GoldVip)
+                        Text("مبلغ مازاد ماهیانه:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("+${extraMonthlyPay.toLong().money()} تومان", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = GoldVip)
                     }
 
                     Slider(
@@ -686,8 +683,9 @@ private fun EarlyPayoffSimulatorSection(
                                 ) {
                                     Text(
                                         "+${chipAmt.toLong().compactMoney()} ت",
-                                        fontSize = 9.5.sp,
-                                        fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal
+                                        ),
                                         color = if (isSel) GoldVip else MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(vertical = 4.dp),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -723,19 +721,18 @@ private fun EarlyPayoffSimulatorSection(
                             if (simulationResult.savedMonths > 0) {
                                 Text(
                                     "تاریخ آزادی مالی: ${simulationResult.acceleratedDateText} (به جای ${simulationResult.normalDateText})",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = GoldVip
                                 )
                                 Text(
                                     "کل بدهی‌ها به جای ${simulationResult.normalMonths.faDigits()} ماه، ظرف مدت ${simulationResult.acceleratedMonths.faDigits()} ماه به طور کامل صفر می‌شوند.",
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             } else {
                                 Text(
                                     "پایان تسویه اقساط: ${simulationResult.normalDateText} (${simulationResult.normalMonths.faDigits()} ماه دیگر)",
-                                    fontSize = 10.5.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -781,11 +778,11 @@ private fun ProviderDistributionSection(
                     Text("🏦", fontSize = 18.sp)
                     Text("تفکیک تعهدات بر اساس مقصد و بانک", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
-                Text("${providerGroups.size.faDigits()} مقصد", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("${providerGroups.size.faDigits()} مقصد", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             if (providerGroups.isEmpty()) {
-                Text("هیچ قسط فعالی برای تفکیک وجود ندارد.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("هیچ قسط فعالی برای تفکیک وجود ندارد.", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
                 providerGroups.forEach { (providerName, items) ->
                     val totalSum = items.sumOf { it.remainingAmount }
@@ -802,7 +799,7 @@ private fun ProviderDistributionSection(
                             Text(providerName, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                             Text(
                                 "${totalSum.money()} ت (${(ratio * 100).toInt().faDigits()}٪)",
-                                fontSize = 10.sp,
+                                style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -864,7 +861,7 @@ private fun FinancialBadgesSection(
                     Text("🎖️", fontSize = 18.sp)
                     Text("نشان‌ها و دستاوردهای انضباط مالی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
-                Text("${badges.count { it.isUnlocked }.faDigits()} از ${badges.size.faDigits()} آنلاک", fontSize = 10.sp, color = GoldVip, fontWeight = FontWeight.Bold)
+                Text("${badges.count { it.isUnlocked }.faDigits()} از ${badges.size.faDigits()} آنلاک", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = GoldVip)
             }
 
             LazyRow(
@@ -888,17 +885,15 @@ private fun FinancialBadgesSection(
                             Text(badge.emoji, fontSize = 26.sp)
                             Text(
                                 badge.title,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 textAlign = TextAlign.Center,
                                 color = if (badge.isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 badge.desc,
-                                fontSize = 9.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                lineHeight = 12.sp
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
