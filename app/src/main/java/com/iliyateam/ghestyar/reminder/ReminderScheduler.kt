@@ -12,7 +12,8 @@ import java.time.ZoneId
 
 object ReminderScheduler {
     private fun am(ctx: Context) = ctx.getSystemService(AlarmManager::class.java)
-    private fun rc(id: Long, i: Int) = (id * 10 + i).toInt() + 90_000
+    fun rc(id: Long, i: Int): Int =
+        (((id.hashCode() * 31 + i) and 0x7FFFFFFF) % 1_000_000) + 90_000
 
     private fun pi(ctx: Context, code: Int, title: String, msg: String, nid: Int): PendingIntent {
         val intent = Intent(ctx, ReminderReceiver::class.java)

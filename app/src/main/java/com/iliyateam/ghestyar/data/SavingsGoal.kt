@@ -4,7 +4,12 @@ package com.iliyateam.ghestyar.data
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
-@Entity(tableName = "savings_goals")
+@Entity(
+    tableName = "savings_goals",
+    indices = [
+        Index(value = ["profileId"])
+    ]
+)
 data class SavingsGoal(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
@@ -45,4 +50,7 @@ interface SavingsGoalDao {
 
     @Delete
     suspend fun delete(goal: SavingsGoal)
+
+    @Query("DELETE FROM savings_goals WHERE profileId = :profileId")
+    suspend fun deleteByProfileId(profileId: Long)
 }

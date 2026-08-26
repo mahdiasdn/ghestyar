@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.iliyateam.ghestyar.data.*
 import com.iliyateam.ghestyar.reminder.ReminderScheduler
 import com.iliyateam.ghestyar.util.JalaliDate
@@ -12,6 +13,7 @@ import com.iliyateam.ghestyar.util.toJalali
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 enum class AppThemeMode {
@@ -164,23 +166,29 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun deleteProfile(profile: UserProfile, onDone: () -> Unit = {}) {
         if (profile.isDefault || profile.id == 1L) return
-        viewModelScope.launch {
-            // حذف کامل اطلاعات ایزوله این پروفایل
+        viewModelScope.launch(Dispatchers.IO) {
             val pId = profile.id
+            // لغو تمامی یادآورهای مربوط به اقساط این پروفایل
             installmentDao.getAll().filter { it.profileId == pId }.forEach {
                 ReminderScheduler.cancel(getApplication(), it)
-                installmentDao.delete(it)
             }
-            transactionDao.getAll().filter { it.profileId == pId }.forEach { transactionDao.delete(it) }
-            savingsGoalDao.getAll().filter { it.profileId == pId }.forEach { savingsGoalDao.delete(it) }
-            chequeOrDebtDao.getAll().filter { it.profileId == pId }.forEach { chequeOrDebtDao.delete(it) }
 
-            userProfileDao.delete(profile)
-
-            if (activeProfileId.value == pId) {
-                selectProfile(1L)
+            // حذف کامل و امن تمام اطلاعات مربوط به این پروفایل در یک تراکنش دیتابیس
+            db.withTransaction {
+                installmentDao.deleteByProfileId(pId)
+                transactionDao.deleteByProfileId(pId)
+                savingsGoalDao.deleteByProfileId(pId)
+                chequeOrDebtDao.deleteByProfileId(pId)
+                loanPoolDao.deletePoolsByProfileId(pId)
+                userProfileDao.delete(profile)
             }
-            onDone()
+
+            withContext(Dispatchers.Main) {
+                if (activeProfileId.value == pId) {
+                    selectProfile(1L)
+                }
+                onDone()
+            }
         }
     }
 
@@ -218,7 +226,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     ) { list, query, category, urgency ->
         val today = LocalDate.now().toEpochDay()
         val nextWeek = today + 7
-        val nextMonth = today + 30
+        val nowJ = JalaliDate.today()
 
         list.filter { item ->
             val matchQuery = query.isBlank() ||
@@ -232,7 +240,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 UrgencyFilter.ALL -> true
                 UrgencyFilter.OVERDUE -> item.dueEpochDay < today
                 UrgencyFilter.DUE_SOON -> item.dueEpochDay in today..nextWeek
-                UrgencyFilter.THIS_MONTH -> item.dueEpochDay <= nextMonth
+                UrgencyFilter.THIS_MONTH -> {
+                    val dueJ = LocalDate.ofEpochDay(item.dueEpochDay).toJalali()
+                    item.dueEpochDay >= today && dueJ.jy == nowJ.jy && dueJ.jm == nowJ.jm
+                }
             }
 
             matchQuery && matchCategory && matchUrgency
@@ -401,6 +412,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val isPinLockEnabled = MutableStateFlow(prefs.getBoolean("pin_enabled", false))
     val pinCode = MutableStateFlow(prefs.getString("pin_code", "") ?: "")
     val notificationHour = MutableStateFlow(prefs.getInt("notif_hour", 9))
+    val isPremium = MutableStateFlow(Premium.isPremium(app))
+
+    fun unlockPremium(tier: SubscriptionTier) {
+        Premium.setPremium(getApplication(), true, tier)
+        isPremium.value = true
+    }
+
+    fun refreshPremium() {
+        isPremium.value = Premium.isPremium(getApplication())
+    }
 
     fun setTheme(mode: AppThemeMode) {
         themeMode.value = mode
@@ -443,8 +464,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun verifyPin(inputPin: String): Boolean {
+        if (!isPinLockEnabled.value) return true
         val stored = pinCode.value
-        if (stored.isBlank()) return true
+        if (stored.isBlank()) return false
         // سازگاری با کاربران دارای پین خام و ارتقای خودکار به هش با سالت
         if (stored == inputPin) {
             setPinLock(true, inputPin)
@@ -923,9 +945,22 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             }
 
             if (data.loanPools.isNotEmpty()) {
-                loanPoolDao.insertAllPools(data.loanPools)
-            }
-            if (data.loanPoolMembers.isNotEmpty()) {
+                val poolIdMap = mutableMapOf<Long, Long>()
+                data.loanPools.forEach { pool ->
+                    val oldId = pool.id
+                    val newId = loanPoolDao.insertPool(pool.copy(id = 0L))
+                    if (oldId > 0) {
+                        poolIdMap[oldId] = newId
+                    }
+                }
+                if (data.loanPoolMembers.isNotEmpty()) {
+                    val remappedMembers = data.loanPoolMembers.map { member ->
+                        val newPoolId = poolIdMap[member.poolId] ?: member.poolId
+                        member.copy(id = 0L, poolId = newPoolId)
+                    }
+                    loanPoolDao.insertMembers(remappedMembers)
+                }
+            } else if (data.loanPoolMembers.isNotEmpty()) {
                 loanPoolDao.insertAllMembers(data.loanPoolMembers)
             }
 

@@ -38,6 +38,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.iliyateam.ghestyar.data.Installment
+import com.iliyateam.ghestyar.data.Premium
 import com.iliyateam.ghestyar.ui.components.PinLockDialog
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.components.tabTransitionSpec
@@ -206,7 +207,7 @@ class MainActivity : ComponentActivity() {
         var showPremium by remember { mutableStateOf(false) }
         var showLoanCalculator by remember { mutableStateOf(false) }
         var showExportReports by rememberSaveable { mutableStateOf(false) }
-        var isPremium by remember { mutableStateOf(Premium.isPremium(context)) }
+        val isPremium by vm.isPremium.collectAsStateWithLifecycle()
         var overviewSubTab by rememberSaveable { mutableIntStateOf(0) }
 
         val activeInstallments by vm.active.collectAsStateWithLifecycle()
@@ -529,8 +530,7 @@ class MainActivity : ComponentActivity() {
                 isCurrentlyPremium = isPremium,
                 onDismiss = { showPremium = false },
                 onUnlock = { selectedTier ->
-                    Premium.setPremium(context, true, selectedTier)
-                    isPremium = true
+                    vm.unlockPremium(selectedTier)
                     showPremium = false
                     Toast.makeText(
                         context,
@@ -540,7 +540,7 @@ class MainActivity : ComponentActivity() {
                 },
                 onResetFree = {
                     Premium.setPremium(context, false)
-                    isPremium = false
+                    vm.refreshPremium()
                     showPremium = false
                     Toast.makeText(context, "حالت به نسخه رایگان تغییر یافت", Toast.LENGTH_SHORT).show()
                 }

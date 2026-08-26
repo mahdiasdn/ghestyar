@@ -4,7 +4,13 @@ package com.iliyateam.ghestyar.data
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
-@Entity(tableName = "transactions")
+@Entity(
+    tableName = "transactions",
+    indices = [
+        Index(value = ["profileId"]),
+        Index(value = ["epochDay"])
+    ]
+)
 data class Transaction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
@@ -80,6 +86,9 @@ interface TransactionDao {
 
     @Delete
     suspend fun delete(item: Transaction)
+
+    @Query("DELETE FROM transactions WHERE profileId = :profileId")
+    suspend fun deleteByProfileId(profileId: Long)
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()

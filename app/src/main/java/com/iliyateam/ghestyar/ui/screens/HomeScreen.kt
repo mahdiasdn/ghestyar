@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +42,7 @@ import com.iliyateam.ghestyar.MainViewModel
 import com.iliyateam.ghestyar.data.ChequeOrDebt
 import com.iliyateam.ghestyar.data.Installment
 import com.iliyateam.ghestyar.data.InstallmentCategories
+import com.iliyateam.ghestyar.data.Premium
 import com.iliyateam.ghestyar.ui.components.*
 import com.iliyateam.ghestyar.ui.theme.*
 import com.iliyateam.ghestyar.util.*
@@ -66,6 +68,7 @@ fun HomeScreen(
     onBackup: () -> Unit = {},
     onRestore: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val activeInstallments by vm.active.collectAsStateWithLifecycle()
     val historyInstallments by vm.history.collectAsStateWithLifecycle()
     val stats by vm.stats.collectAsStateWithLifecycle()
@@ -76,7 +79,7 @@ fun HomeScreen(
     val clearedCheques by vm.clearedChequesAndDebts.collectAsStateWithLifecycle()
     val isPrivacyMode by vm.isPrivacyMode.collectAsStateWithLifecycle()
 
-    val canAddMore = isPremium || activeInstallments.size < 5
+    val canAddMore = Premium.canAddMoreInstallments(context, activeInstallments.size)
     var searchExpanded by remember { mutableStateOf(false) }
     var mainSectionTab by rememberSaveable { mutableIntStateOf(0) } // 0: اقساط و وام‌ها, 1: چک‌ها و مطالبات
     var installmentFilterTab by rememberSaveable { mutableIntStateOf(1) } // 0: همه, 1: فعال, 2: تسویه‌شده

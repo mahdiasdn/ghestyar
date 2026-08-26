@@ -157,12 +157,8 @@ data class JalaliDate(
 }
 
 fun LocalDate.toJalali(): JalaliDate {
-    return try {
-        val (jy, jm, jd) = Jalali.fromGregorian(year, monthValue, dayOfMonth)
-        JalaliDate(jy, jm, jd)
-    } catch (e: Exception) {
-        JalaliDate(1404, 1, 1)
-    }
+    val (jy, jm, jd) = Jalali.fromGregorian(year, monthValue, dayOfMonth)
+    return JalaliDate(jy, jm, jd)
 }
 
 // ─── فرمت‌های نمایشی و ارقام فارسی و انگلیسی ───

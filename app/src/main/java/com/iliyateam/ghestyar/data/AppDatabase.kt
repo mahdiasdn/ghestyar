@@ -41,8 +41,8 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("CREATE TABLE IF NOT EXISTS `savings_goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `targetAmount` INTEGER NOT NULL, `currentAmount` INTEGER NOT NULL, `emoji` TEXT NOT NULL, `colorIndex` INTEGER NOT NULL, `targetEpochDay` INTEGER, `profileId` INTEGER NOT NULL DEFAULT 1)")
-                db.execSQL("CREATE TABLE IF NOT EXISTS `cheques_or_debts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `amount` INTEGER NOT NULL, `dueEpochDay` INTEGER NOT NULL, `isCheque` INTEGER NOT NULL, `isPayable` INTEGER NOT NULL, `isCleared` INTEGER NOT NULL, `sayadNumber` TEXT NOT NULL, `bankName` TEXT NOT NULL, `contactPerson` TEXT NOT NULL, `note` TEXT NOT NULL, `profileId` INTEGER NOT NULL DEFAULT 1)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `savings_goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `targetAmount` INTEGER NOT NULL, `currentAmount` INTEGER NOT NULL, `targetEpochDay` INTEGER NOT NULL, `emoji` TEXT NOT NULL, `colorIndex` INTEGER NOT NULL, `note` TEXT NOT NULL DEFAULT '', `profileId` INTEGER NOT NULL DEFAULT 1)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `cheques_and_debts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `personName` TEXT NOT NULL, `amount` INTEGER NOT NULL, `isCheque` INTEGER NOT NULL, `isReceivable` INTEGER NOT NULL, `dueEpochDay` INTEGER NOT NULL, `isCleared` INTEGER NOT NULL, `chequeNumber` TEXT NOT NULL, `bankName` TEXT NOT NULL, `note` TEXT NOT NULL, `profileId` INTEGER NOT NULL DEFAULT 1)")
             }
         }
 

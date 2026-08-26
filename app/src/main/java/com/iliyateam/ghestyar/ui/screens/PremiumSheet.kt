@@ -25,9 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.iliyateam.ghestyar.data.SubscriptionTier
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.theme.*
-import com.iliyateam.ghestyar.util.SubscriptionTier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -3,5 +3,6 @@
     <include domain="database" path="ghestyar.db"/>
     <include domain="database" path="ghestyar.db-wal"/>
     <include domain="database" path="ghestyar.db-shm"/>
-    <include domain="sharedpref" path="."/>
+    <exclude domain="sharedpref" path="ghestyar_settings.xml"/>
+    <exclude domain="sharedpref" path="ghestyar_premium.xml"/>
 </full-backup-content>

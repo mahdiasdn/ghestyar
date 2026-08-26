@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import com.iliyateam.ghestyar.ui.components.AppLogo
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -144,7 +145,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     AboutLinkRow(
                         title = "صفحه قسط‌یار در مایکت 📲",
                         subtitle = "مشاهده صفحه رسمی برنامه در استور مایکت",
-                        icon = Icons.Rounded.OpenInNew,
+                        icon = Icons.AutoMirrored.Rounded.OpenInNew,
                         onClick = { openMyketDetails(context) }
                     )
 

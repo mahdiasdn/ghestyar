@@ -30,6 +30,9 @@ import com.iliyateam.ghestyar.data.Installment
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.theme.*
 import com.iliyateam.ghestyar.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 enum class ExportTimeFilter(val title: String, val emoji: String) {
@@ -45,11 +48,13 @@ enum class ExportTimeFilter(val title: String, val emoji: String) {
 fun ExportReportSheet(
     allInstallments: List<Installment>,
     onDismiss: () -> Unit,
-    onSaveDocument: (isPdf: Boolean, items: List<Installment>, titleScope: String) -> Unit
+    onSaveDocument: (isPdf: Boolean, items: List<Installment>, filterTitle: String) -> Unit
 ) {
     val context = LocalContext.current
     var isPdfFormat by remember { mutableStateOf(true) } // true: PDF, false: Excel
     var selectedFilter by remember { mutableStateOf(ExportTimeFilter.ALL) }
+    var isExporting by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val todayJalali = remember { JalaliDate.today() }
     val todayEpoch = remember { LocalDate.now().toEpochDay() }
@@ -268,22 +273,35 @@ fun ExportReportSheet(
                             Toast.makeText(context, "هیچ قسطی در این فیلتر وجود ندارد!", Toast.LENGTH_SHORT).show()
                             return@OutlinedButton
                         }
-                        try {
-                            Exporter.shareReportFile(context, filteredItems, isPdfFormat, selectedFilter.title)
-                            onDismiss()
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "خطا در اشتراک‌گذاری: ${e.message}", Toast.LENGTH_SHORT).show()
+                        if (isExporting) return@OutlinedButton
+                        isExporting = true
+                        coroutineScope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    Exporter.shareReportFile(context, filteredItems, isPdfFormat, selectedFilter.title)
+                                }
+                                onDismiss()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "خطا در اشتراک‌گذاری: ${e.message}", Toast.LENGTH_SHORT).show()
+                            } finally {
+                                isExporting = false
+                            }
                         }
                     },
+                    enabled = !isExporting,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
                         .bounceClick(minScale = 0.96f)
                 ) {
-                    Icon(Icons.Rounded.Share, null, modifier = Modifier.size(18.dp))
+                    if (isExporting) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Rounded.Share, null, modifier = Modifier.size(18.dp))
+                    }
                     Spacer(Modifier.width(6.dp))
-                    Text("اشتراک مستقیم", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                    Text(if (isExporting) "در حال تولید..." else "اشتراک مستقیم", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
                 // دکمه ذخیره فایل در حافظه
