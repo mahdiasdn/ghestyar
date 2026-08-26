@@ -50,7 +50,8 @@ fun PinLockDialog(
     onSuccess: () -> Unit = {},
     isSettingMode: Boolean = false,
     onDismiss: () -> Unit = {},
-    onPinSet: (String) -> Unit = {}
+    onPinSet: (String) -> Unit = {},
+    onPinMatched: (matchedPin: String, matchedViaPlaintext: Boolean, matchedViaSimpleHash: Boolean) -> Unit = { _, _, _ -> }
 ) {
     var inputPin by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -68,8 +69,14 @@ fun PinLockDialog(
                     onPinSet(newPin)
                     onSuccess()
                 } else {
-                    val matches = newPin == correctPin || hashPin(newPin) == correctPin || simpleHashPin(newPin) == correctPin
+                    val viaPlain = (newPin == correctPin) && correctPin.isNotEmpty() && correctPin.length != 64
+                    val viaHash = hashPin(newPin) == correctPin
+                    val viaSimple = !viaPlain && !viaHash && simpleHashPin(newPin) == correctPin
+                    val matches = viaPlain || viaHash || viaSimple
                     if (matches) {
+                        if (viaPlain || viaSimple) {
+                            onPinMatched(newPin, viaPlain, viaSimple)
+                        }
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSuccess()
                     } else {

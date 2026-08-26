@@ -261,6 +261,11 @@ class MainActivity : ComponentActivity() {
         if (isPinLockEnabled && !isUnlocked) {
             PinLockDialog(
                 correctPin = pinCode,
+                onPinMatched = { matched, viaPlain, viaSimple ->
+                    if (viaPlain || viaSimple) {
+                        vm.setPinLock(true, matched)
+                    }
+                },
                 onSuccess = { isUnlocked = true }
             )
             return

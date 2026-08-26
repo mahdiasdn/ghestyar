@@ -181,8 +181,7 @@ fun InstallmentCard(
                             Text(
                                 if (item.isPaid) "تسویه شده ✨"
                                 else "قسط ${item.paidSessions.faDigits()} از ${item.totalSessions.faDigits()}",
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = if (isDark) MossLight else MossDeep,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
@@ -211,8 +210,7 @@ fun InstallmentCard(
                                     )
                                     Text(
                                         item.destination,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Medium,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                         color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF334155),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -243,7 +241,7 @@ fun InstallmentCard(
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("مشاهده جزئیات کامل", fontSize = 12.sp) },
+                            text = { Text("مشاهده جزئیات کامل", style = MaterialTheme.typography.labelLarge) },
                             leadingIcon = { Icon(Icons.Outlined.Info, null, modifier = Modifier.size(18.dp)) },
                             onClick = {
                                 menuOpen = false
@@ -251,7 +249,7 @@ fun InstallmentCard(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("ویرایش قسط", fontSize = 12.sp) },
+                            text = { Text("ویرایش قسط", style = MaterialTheme.typography.labelLarge) },
                             leadingIcon = { Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(18.dp)) },
                             onClick = {
                                 menuOpen = false
@@ -260,7 +258,7 @@ fun InstallmentCard(
                         )
                         if (item.paidSessions > 0 && onUnmarkPaid != null) {
                             DropdownMenuItem(
-                                text = { Text("بازگردانی آخرین پرداخت ↩️", fontSize = 12.sp, color = Coral) },
+                                text = { Text("بازگردانی آخرین پرداخت ↩️", style = MaterialTheme.typography.labelLarge, color = Coral) },
                                 leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Undo, null, tint = Coral, modifier = Modifier.size(18.dp)) },
                                 onClick = {
                                     menuOpen = false
@@ -270,7 +268,7 @@ fun InstallmentCard(
                         }
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         DropdownMenuItem(
-                            text = { Text("حذف قسط", color = Coral, fontSize = 12.sp) },
+                            text = { Text("حذف قسط", color = Coral, style = MaterialTheme.typography.labelLarge) },
                             leadingIcon = { Icon(Icons.Outlined.Delete, null, tint = Coral, modifier = Modifier.size(18.dp)) },
                             onClick = {
                                 menuOpen = false
@@ -290,12 +288,12 @@ fun InstallmentCard(
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         "مبلغ هر قسط:",
-                        fontSize = 11.5.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         "${item.amount.money()} تومان",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (isDark) MossLight else Moss
                     )
@@ -304,7 +302,7 @@ fun InstallmentCard(
                 if (item.totalSessions > 1) {
                     Text(
                         "مانده کل: ${item.remainingAmount.money()} ت",
-                        fontSize = 10.5.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -344,8 +342,7 @@ fun InstallmentCard(
                             Text("✨", fontSize = 13.sp)
                             Text(
                                 "تمام اقساط این وام با موفقیت پرداخت و تسویه شد",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Moss
                             )
                         }
@@ -364,16 +361,14 @@ fun InstallmentCard(
                                 }
                                 Text(
                                     "این ماه پرداخت شده ✅",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                     color = Moss
                                 )
                             }
 
                             Text(
                                 "قسط بعدی: ${due.formatJalali()} (${daysLeft.faDigits()} روز دیگر)",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -405,16 +400,14 @@ fun InstallmentCard(
                                         daysLeft == 0L -> "سررسید قسط امروز است ⚡"
                                         else -> "${daysLeft.faDigits()} روز تا سررسید قسط ${(item.paidSessions + 1).faDigits()}"
                                     },
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                     color = if (daysLeft < 0) Coral else if (daysLeft <= 3) GoldVip else MaterialTheme.colorScheme.onSurface
                                 )
                             }
 
                             Text(
                                 "سررسید: ${due.formatJalali()}",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                                 color = if (daysLeft < 0) Coral else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -440,13 +433,12 @@ fun InstallmentCard(
                     ) {
                         Text(
                             "${((item.overallProgress * 100).toInt()).faDigits()}٪ تسویه شده",
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = if (isDark) MossLight else Moss
                         )
                         Text(
                             "${remainingSessions.faDigits()} قسط مانده",
-                            fontSize = 9.5.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -478,7 +470,7 @@ fun InstallmentCard(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Icon(Icons.Rounded.CheckCircle, null, tint = Moss, modifier = Modifier.size(15.dp))
-                                Text("پرداخت شده", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Moss)
+                                Text("پرداخت شده", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Moss)
                             }
                         }
                     } else {
@@ -506,7 +498,7 @@ fun InstallmentCard(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(Icons.Rounded.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
-                                    Text("پرداخت این قسط", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    Text("پرداخت این قسط", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
                                 }
                             }
                         }
