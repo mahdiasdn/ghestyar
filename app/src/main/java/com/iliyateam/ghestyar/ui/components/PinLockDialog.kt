@@ -24,6 +24,15 @@ import com.iliyateam.ghestyar.ui.theme.Coral
 import com.iliyateam.ghestyar.ui.theme.Moss
 import com.iliyateam.ghestyar.util.faDigits
 
+private fun hashPin(pin: String): String {
+    if (pin.isBlank()) return ""
+    return try {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(pin.toByteArray(Charsets.UTF_8))
+        digest.fold("") { str, it -> str + "%02x".format(it) }
+    } catch (_: Exception) { pin }
+}
+
 @Composable
 fun PinLockDialog(
     correctPin: String = "",
@@ -48,7 +57,7 @@ fun PinLockDialog(
                     onPinSet(newPin)
                     onSuccess()
                 } else {
-                    if (newPin == correctPin) {
+                    if (newPin == correctPin || hashPin(newPin) == correctPin) {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSuccess()
                     } else {

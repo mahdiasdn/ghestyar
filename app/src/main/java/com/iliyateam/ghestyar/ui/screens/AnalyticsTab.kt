@@ -406,18 +406,20 @@ private fun FutureCommitmentProjectionSection(activeInstallments: List<Installme
     val monthsProjection = remember(activeInstallments) {
         val today = JalaliDate.today()
         (0..5).map { offset ->
-            var monthNum = today.jm + offset
-            var yearNum = today.jy
-            while (monthNum > 12) {
-                monthNum -= 12
-                yearNum += 1
-            }
-            val monthName = Jalali.months[monthNum - 1]
+            val targetJDate = today.plusMonths(offset)
+            val monthName = Jalali.months[targetJDate.jm - 1]
 
-            // محاسبه مبلغ تعهد در این ماه
+            // محاسبه دقیق تعهد در این ماه بر اساس سررسید اقساط باقی‌مانده
             val monthAmount = activeInstallments.filter { item ->
-                val remainingSessions = item.totalSessions - item.paidSessions
-                offset < remainingSessions
+                if (item.isPaid || item.paidSessions >= item.totalSessions) false
+                else {
+                    val startJ = LocalDate.ofEpochDay(item.startEpochDay).toJalali()
+                    val remainingStartSession = item.paidSessions + 1
+                    (remainingStartSession..item.totalSessions).any { s ->
+                        val sessionDue = startJ.plusMonths(s - 1)
+                        sessionDue.jy == targetJDate.jy && sessionDue.jm == targetJDate.jm
+                    }
+                }
             }.sumOf { it.amount }
 
             Triple(monthName, monthAmount, offset == 0)
@@ -461,7 +463,7 @@ private fun FutureCommitmentProjectionSection(activeInstallments: List<Installme
                     verticalAlignment = Alignment.Bottom
                 ) {
                     monthsProjection.forEach { (monthName, amount, isCurrentMonth) ->
-                        val barRatio = (amount.toFloat() / maxAmount).coerceIn(0.12f, 1f)
+                        val barRatio = if (amount > 0L && maxAmount > 0L) (amount.toFloat() / maxAmount).coerceIn(0.12f, 1f) else 0f
                         val animatedBarHeight by animateFloatAsState(
                             targetValue = barRatio,
                             animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),

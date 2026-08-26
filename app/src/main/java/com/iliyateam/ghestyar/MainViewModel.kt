@@ -291,9 +291,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val totalOutflow = expense + monthInstallments + payableCheques
         val remainingNet = totalInflow - totalOutflow
 
-        // درآمدهای تکرارشونده و ثابت ماهانه در پروفایل فعال
-        val recurringIncome = txList.filter { it.isIncome && it.isRecurring }.sumOf { it.amount }
-        val recurringExpense = txList.filter { !it.isIncome && it.isRecurring }.sumOf { it.amount }
+        // درآمدهای تکرارشونده و ثابت ماهانه در پروفایل فعال (محاسبه ماه جاری یا یکتا برای جلوگیری از دوباره‌شماری ماه‌های قبل)
+        val recurringIncome = thisMonthTx.filter { it.isIncome && it.isRecurring }.sumOf { it.amount }
+            .takeIf { it > 0 } ?: txList.filter { it.isIncome && it.isRecurring }.distinctBy { it.title.trim().lowercase() }.sumOf { it.amount }
+        val recurringExpense = thisMonthTx.filter { !it.isIncome && it.isRecurring }.sumOf { it.amount }
+            .takeIf { it > 0 } ?: txList.filter { !it.isIncome && it.isRecurring }.distinctBy { it.title.trim().lowercase() }.sumOf { it.amount }
 
         CashflowSummary(
             totalIncome = income,
@@ -317,10 +319,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         cashflowSummary
     ) { activeList, historyList, cashflow ->
         val today = LocalDate.now().toEpochDay()
-        val next30Days = today + 30
 
         val totalActiveDebt = activeList.sumOf { it.remainingAmount }
-        val monthlyCommitment = activeList.filter { it.dueEpochDay <= next30Days }.sumOf { it.amount }
+        val monthlyCommitment = cashflow.thisMonthInstallments
         val totalPaidActive = activeList.sumOf { it.paidAmount }
         val totalPaidHistory = historyList.sumOf { it.totalAmount }
         val totalPaidAllTime = totalPaidActive + totalPaidHistory
@@ -330,9 +331,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val completedCount = historyList.size
         val overdueCount = activeList.count { it.dueEpochDay < today }
 
-        val overallHealthPercentage = if (totalInstallmentsCount > 0) {
-            val onTimeRatio = (activeList.count { it.dueEpochDay >= today } + completedCount).toFloat() / totalInstallmentsCount
-            (onTimeRatio * 100f).coerceIn(0f, 100f)
+        val overdueDebt = activeList.filter { it.dueEpochDay < today }.sumOf { it.remainingAmount }
+        val onTimeDebt = (totalActiveDebt - overdueDebt).coerceAtLeast(0L)
+        val overallHealthPercentage = if (totalActiveDebt > 0L) {
+            val debtRatio = (onTimeDebt.toFloat() / totalActiveDebt).coerceIn(0f, 1f)
+            val countRatio = if (activeCount > 0) (activeCount - overdueCount).toFloat() / activeCount else 1f
+            ((debtRatio * 0.7f + countRatio * 0.3f) * 100f).coerceIn(0f, 100f)
         } else 100f
 
         val safeCapacity = if (cashflow.remainingAfterInstallments > 0) {
@@ -400,18 +404,43 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         prefs.edit().putBoolean("privacy_mode", enabled).apply()
     }
 
+    private fun hashPin(pin: String): String {
+        if (pin.isBlank()) return ""
+        return try {
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            val digest = md.digest(pin.toByteArray(Charsets.UTF_8))
+            digest.fold("") { str, it -> str + "%02x".format(it) }
+        } catch (_: Exception) { pin }
+    }
+
+    fun verifyPin(inputPin: String): Boolean {
+        val stored = pinCode.value
+        if (stored.isBlank()) return true
+        return stored == inputPin || stored == hashPin(inputPin)
+    }
+
     fun setPinLock(enabled: Boolean, code: String = "") {
+        val hashed = if (code.isNotBlank()) hashPin(code) else ""
         isPinLockEnabled.value = enabled
-        pinCode.value = code
+        pinCode.value = hashed
         prefs.edit()
             .putBoolean("pin_enabled", enabled)
-            .putString("pin_code", code)
+            .putString("pin_code", hashed)
             .apply()
     }
 
     fun setNotificationHour(hour: Int) {
         notificationHour.value = hour
         prefs.edit().putInt("notif_hour", hour).apply()
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val profilesMap = userProfileDao.getAll().associateBy { it.id }
+                installmentDao.getAll().filter { !it.isPaid && it.remind }.forEach { item ->
+                    val pName = profilesMap[item.profileId]?.name.orEmpty()
+                    ReminderScheduler.schedule(getApplication(), item, pName, hour)
+                }
+            } catch (_: Exception) {}
+        }
     }
 
     // ─── عملیات اقساط ───

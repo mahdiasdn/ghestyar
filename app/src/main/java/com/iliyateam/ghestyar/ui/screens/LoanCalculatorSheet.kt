@@ -316,9 +316,12 @@ data class LoanCalculationResult(
 fun calculateBankLoan(principal: Long, annualRatePercent: Double, months: Int): LoanCalculationResult {
     if (principal <= 0L || months <= 0) return LoanCalculationResult(0L, 0L, 0L)
     if (annualRatePercent <= 0.01) {
-        val monthly = (principal / months).coerceAtLeast(0L)
-        val total = monthly * months
-        return LoanCalculationResult(monthly, (total - principal).coerceAtLeast(0L), total)
+        val monthly = (principal.toDouble() / months).toLong().coerceAtLeast(0L)
+        return LoanCalculationResult(
+            monthlyPayment = monthly,
+            totalInterest = 0L,
+            totalRepayment = principal
+        )
     }
 
     // فرمول رسمی بانک مرکزی ایران با گارد مخرج برای دقت عددی بالا
@@ -331,7 +334,7 @@ fun calculateBankLoan(principal: Long, annualRatePercent: Double, months: Int): 
         (principal.toDouble() / months)
     }
     val monthlyLong = monthlyPayment.toLong()
-    val totalRepayment = monthlyLong * months
+    val totalRepayment = (monthlyPayment * months).toLong().coerceAtLeast(principal)
     val totalInterest = (totalRepayment - principal).coerceAtLeast(0L)
 
     return LoanCalculationResult(
