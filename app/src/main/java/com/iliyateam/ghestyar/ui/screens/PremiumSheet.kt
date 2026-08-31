@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -110,13 +111,18 @@ fun PremiumSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp),
+                    .height(95.dp)
+                    .padding(top = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // هاله‌های نور پس‌زمینه
+                // هاله‌های نور پس‌زمینه (استفاده از graphicsLayer برای جلوگیری از تغییر ارتفاع و پرش صفحه)
                 Box(
                     modifier = Modifier
-                        .size((110 * heroPulse).dp)
+                        .size(110.dp)
+                        .graphicsLayer {
+                            scaleX = heroPulse
+                            scaleY = heroPulse
+                        }
                         .clip(CircleShape)
                         .background(
                             Brush.radialGradient(
@@ -201,11 +207,10 @@ fun PremiumSheet(
                 )
 
                 Text(
-                    "صرفه‌جویی میلیونی در سود وام‌ها، کنترل کامل چک‌ها و مدیریت صندوق‌ها",
-                    style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                    "صرفه‌جویی در سود بانکی، کنترل چک‌ها و مدیریت صندوق‌های وام",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    textAlign = TextAlign.Center
                 )
             }
 
@@ -317,7 +322,7 @@ fun PremiumSheet(
             // ─── ۳. کارت‌های مزایا به سبک Bento Grid پیشرفته متریال ۳ ───
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -334,7 +339,7 @@ fun PremiumSheet(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                     ) {
                         Text(
-                            text = "۱۱ قابلیت برتر ⚡",
+                            text = "VIP Access ⚡",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -342,62 +347,37 @@ fun PremiumSheet(
                     }
                 }
 
-                // ستون کارت‌های تفکیک‌شده بنتو
+                // کارت‌های بنتو متراکم، تمیز و خوانا
                 val features = listOf(
                     Triple(
                         Icons.Rounded.Groups,
-                        "صندوق‌های وام و قرعه‌کشی خانوادگی",
-                        "مدیریت واریزی اعضا، گردونه شانس متحرک و گزارش پیام‌رسان‌ها"
+                        "صندوق‌های وام و قرعه‌کشی",
+                        "مدیریت واریزی‌ها و گردونه شانس متحرک"
                     ),
                     Triple(
                         Icons.Rounded.AutoAwesome,
-                        "بهینه‌ساز استراتژی تسویه بدهی (بهمن)",
-                        "صرفه‌جویی چند میلیونی در سود بانکی با اولویت‌بندی هوشمند"
+                        "کاهش هوشمند سود بانکی (بهمن)",
+                        "اولویت‌بندی تسویه جهت صرفه‌جویی مالی"
                     ),
                     Triple(
                         Icons.Rounded.Widgets,
-                        "ویجت‌های زنده و تعاملی صفحه اصلی",
-                        "روزشمار زنده اقساط و مانده بدهی بدون نیاز به باز کردن برنامه"
-                    ),
-                    Triple(
-                        Icons.Rounded.Palette,
-                        "تم‌های اشرافی VIP (Obsidian Gold)",
-                        "شخصی‌سازی لوکس با پوسته‌های طلایی، زمردی و یاقوتی اختصاصی"
+                        "ویجت زنده صفحه اصلی گوشی",
+                        "روزشمار تعاملی بدون نیاز به باز کردن برنامه"
                     ),
                     Triple(
                         Icons.Rounded.PictureAsPdf,
-                        "دفترچه رسمی بانکی اقساط (PDF & Excel)",
-                        "صدور دفترچه رسمی بانکی A4 با جدول سررسید، بارکد و محل امضا"
-                    ),
-                    Triple(
-                        Icons.Rounded.Timeline,
-                        "پیش‌بینی جریان نقدینگی ۶ ماه آینده",
-                        "تحلیل آینده‌نگر موجودی با احتساب تمام اقساط و سررسید چک‌ها"
-                    ),
-                    Triple(
-                        Icons.AutoMirrored.Rounded.Send,
-                        "پیامک‌ساز و یادآور هوشمند تعهدات",
-                        "تولید متن‌های رسمی و آماده ارسال با اطلاعات قسط و شماره کارت"
+                        "دفترچه رسمی اقساط (PDF & Excel)",
+                        "گزارش‌های A4 استاندارد همراه با بارکد"
                     ),
                     Triple(
                         Icons.Rounded.AllInclusive,
-                        "ثبت نامحدود اقساط، وام‌ها و چک‌ها",
-                        "مدیریت بدون سقف تمام تعهدات مالی (رایگان: حداکثر ۴ قسط)"
+                        "ثبت نامحدود اقساط و چک‌ها",
+                        "بدون سقف و محدودیت در تمام بخش‌ها"
                     ),
                     Triple(
-                        Icons.Rounded.SupervisorAccount,
-                        "پروفایل‌های مالی ایزوله و چندگانه",
-                        "تفکیک کامل حساب‌های شخصی، خانوادگی، شرکت و فروشگاه"
-                    ),
-                    Triple(
-                        Icons.Rounded.FileDownload,
-                        "پشتیبان‌گیری آفلاین و بازیابی ایمن",
-                        "ذخیره فایل پشتیبان جامع با یک لمس و بازیابی کامل در تمام دستگاه‌ها"
-                    ),
-                    Triple(
-                        Icons.Rounded.Block,
-                        "حذف کامل تبلیغات و تجربه روان",
-                        "محیطی کاملاً تمیز، آرامش‌بخش و فوق‌العاده سریع"
+                        Icons.Rounded.Palette,
+                        "شخصی‌سازی با تم‌های لوکس VIP",
+                        "پوسته‌های اشرافی Obsidian Gold و زمردی"
                     )
                 )
 

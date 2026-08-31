@@ -166,7 +166,7 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 10.dp),
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -176,20 +176,19 @@ fun HomeScreen(
                     ) {
                         AppLogo(
                             modifier = Modifier
-                                .size(44.dp)
+                                .size(42.dp)
                                 .bounceClick(minScale = 0.92f)
                         )
 
                         Column {
                             Text(
-                                "مدیریت اقساط و چک‌ها",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
+                                "قسط‌یار",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                "${activeInstallments.size.faDigits()} قسط • ${pendingCheques.size.faDigits()} چک در انتظار • ${Jalali.months[JalaliDate.today().jm - 1]} ${JalaliDate.today().jy.faDigits()}",
-                                style = MaterialTheme.typography.labelMedium,
+                                "${Jalali.months[JalaliDate.today().jm - 1]} ${JalaliDate.today().jy.faDigits()} • ${activeInstallments.size.faDigits()} قسط جاری",
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -197,40 +196,40 @@ fun HomeScreen(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         IconButton(
                             onClick = onExportExcel,
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 Icons.Rounded.PictureAsPdf,
-                                contentDescription = "گزارش‌گیری PDF و اکسل",
-                                modifier = Modifier.size(20.dp),
+                                contentDescription = "گزارش‌گیری",
+                                modifier = Modifier.size(19.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
                         IconButton(
                             onClick = onOpenAnalytics,
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 Icons.Rounded.Analytics,
                                 contentDescription = "آمار و تحلیل",
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
                         IconButton(
                             onClick = { searchExpanded = !searchExpanded },
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 if (searchExpanded) Icons.Rounded.Close else Icons.Rounded.Search,
                                 contentDescription = "جستجو",
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -269,9 +268,9 @@ fun HomeScreen(
             // ۲. سوییچر اصلی بالای صفحه: تب اقساط و وام‌ها VS چک‌ها و مطالبات
             item {
                 Surface(
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(50),
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
@@ -292,14 +291,14 @@ fun HomeScreen(
                             val isSelected = mainSectionTab == index
                             Surface(
                                 onClick = { mainSectionTab = index },
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(50),
                                 color = if (isSelected) Moss else Color.Transparent,
                                 modifier = Modifier
                                     .weight(1f)
                                     .bounceClick(minScale = 0.96f)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(vertical = 10.dp),
+                                    modifier = Modifier.padding(vertical = 9.dp),
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -307,7 +306,7 @@ fun HomeScreen(
                                         icon,
                                         contentDescription = null,
                                         tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(17.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
@@ -326,19 +325,15 @@ fun HomeScreen(
 
             // ۳. محتوای تب انتخاب‌شده (اقساط یا چک‌ها)
             if (mainSectionTab == 0) {
-                // ══════════════════════════════════════════════════════════════
-                // الف) بخش اقساط و وام‌ها
-                // ══════════════════════════════════════════════════════════════
+                // الف) هیرو کارت مالی یکپارچه و خلوت M3 Expressive
                 item {
-                    HeroDebtSummaryCard(
+                    M3ExpressiveHomeHeroCard(
                         stats = stats,
                         activeCount = activeInstallments.size,
-                        paidCount = historyInstallments.size
+                        paidCount = historyInstallments.size,
+                        nextItem = activeInstallments.firstOrNull(),
+                        onNextItemClick = onDetail
                     )
-                }
-
-                item {
-                    NextDueTonalCard(active = activeInstallments)
                 }
 
                 // سوییچر ۳ حالته وضعیت اقساط (همه / فعال / تسویه‌شده)
@@ -355,14 +350,10 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
-                                modifier = Modifier.padding(4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                modifier = Modifier.padding(3.dp),
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
                             ) {
-                                val tabs = listOf(
-                                    "همه (${(activeInstallments.size + historyInstallments.size).faDigits()})",
-                                    "فعال (${activeInstallments.size.faDigits()})",
-                                    "تسویه‌شده (${historyInstallments.size.faDigits()})"
-                                )
+                                val tabs = listOf("همه", "فعال", "تسویه‌شده")
 
                                 tabs.forEachIndexed { index, title ->
                                     val isSelected = installmentFilterTab == index
@@ -377,12 +368,12 @@ fun HomeScreen(
                                     ) {
                                         Text(
                                             text = title,
-                                            style = MaterialTheme.typography.labelLarge.copy(
+                                            style = MaterialTheme.typography.labelMedium.copy(
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                             ),
                                             color = if (isSelected) (if (isDark) MossLight else Color.White) else MaterialTheme.colorScheme.onSurfaceVariant,
                                             textAlign = TextAlign.Center,
-                                            modifier = Modifier.padding(vertical = 8.dp)
+                                            modifier = Modifier.padding(vertical = 7.dp)
                                         )
                                     }
                                 }
@@ -401,7 +392,7 @@ fun HomeScreen(
                             FilterChip(
                                 selected = selectedCategory == null,
                                 onClick = { vm.setCategoryFilter(null) },
-                                label = { Text("همه دسته‌ها", style = MaterialTheme.typography.labelMedium) },
+                                label = { Text("همه", style = MaterialTheme.typography.labelSmall) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Moss,
@@ -415,7 +406,7 @@ fun HomeScreen(
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { vm.setCategoryFilter(if (isSelected) null else cat.id) },
-                                label = { Text("${cat.emoji} ${cat.title}", style = MaterialTheme.typography.labelMedium) },
+                                label = { Text("${cat.emoji} ${cat.title}", style = MaterialTheme.typography.labelSmall) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Moss,
@@ -745,19 +736,19 @@ private fun ChequeRowItem(
 ) {
     val due = LocalDate.ofEpochDay(item.dueEpochDay)
 
-    Card(
+    Surface(
         onClick = onEdit,
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, if (item.isReceivable) ChequeBlue.copy(alpha = 0.3f) else Coral.copy(alpha = 0.3f)),
         modifier = Modifier
             .fillMaxWidth()
-            .bounceClick(minScale = 0.98f),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        border = BorderStroke(1.dp, ChequeBlue.copy(alpha = 0.25f))
+            .bounceClick(minScale = 0.98f)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -773,8 +764,10 @@ private fun ChequeRowItem(
             ) {
                 Text(
                     text = item.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 15.sp
+                    ),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -784,7 +777,6 @@ private fun ChequeRowItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(if (item.isCheque) "✍️" else "🤝", fontSize = 12.sp)
                     Surface(
                         shape = RoundedCornerShape(50),
                         color = if (item.isReceivable) ChequeBlue.copy(alpha = 0.14f) else MaterialTheme.colorScheme.errorContainer
@@ -798,8 +790,8 @@ private fun ChequeRowItem(
                         )
                     }
                     Text(
-                        text = "طرف: ${item.personName} • موعد: ${due.formatJalali()}",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = "${item.personName} • ${due.formatJalali()}",
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -809,8 +801,10 @@ private fun ChequeRowItem(
 
             Text(
                 text = if (isPrivacy) "••••••" else "${item.amount.money()} ت",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Black,
+                    fontSize = 16.sp
+                ),
                 color = if (item.isReceivable) ChequeBlue else Coral
             )
 
@@ -822,14 +816,7 @@ private fun ChequeRowItem(
                     onClick = onShowReceipt,
                     modifier = Modifier.size(28.dp)
                 ) {
-                    Icon(Icons.Outlined.Share, "کارت تصویری یادآوری", tint = ChequeBlue, modifier = Modifier.size(16.dp))
-                }
-
-                IconButton(
-                    onClick = onEdit,
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(Icons.Outlined.Edit, "ویرایش", tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
+                    Icon(Icons.Outlined.Share, "اشتراک رسید", tint = ChequeBlue, modifier = Modifier.size(16.dp))
                 }
 
                 IconButton(
@@ -1058,64 +1045,85 @@ private fun AddOrEditChequeDialog(
 }
 
 /**
- * کارت برجسته Hero: مانده کل بدهی با پیشرفت پرداخت
+ * کارت هیرو جامع مالی با طراحی رسمی Material 3 Expressive
+ * ترکیب هوشمند تعهدات ماه جاری، مانده کل، درصد پیشرفت و سررسید بعدی در یک کانتینر خلوت و مدرن
  */
 @Composable
-private fun HeroDebtSummaryCard(
+private fun M3ExpressiveHomeHeroCard(
     stats: FinancialStats,
     activeCount: Int,
-    paidCount: Int
+    paidCount: Int,
+    nextItem: Installment?,
+    onNextItemClick: ((Installment) -> Unit)? = null
 ) {
-    val totalCount = activeCount + paidCount
     val isDark = isSystemInDarkTheme()
 
-    Card(
+    Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = if (isDark) Color(0xFF161F1E) else Color(0xFF005F63),
+        border = if (isDark) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)) else null,
+        shadowElevation = 3.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .bounceClick(minScale = 0.98f),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = if (isDark) Color(0xFF1F2527) else Color(0xFF006A6E)),
-        border = if (isDark) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .bounceClick(minScale = 0.98f)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(22.dp),
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column {
-                Text(
-                    "مانده کل بدهی اقساط",
-                    color = Color.White.copy(alpha = 0.82f),
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
-                )
-                Spacer(Modifier.height(4.dp))
-                AnimatedMoneyText(
-                    amount = stats.totalActiveDebt,
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    suffix = "تومان"
-                )
+            // سطر اول: تعهدات ماه جاری با رقم درشت و بج تعداد
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Text(
+                        text = "تعهدات اقساط این ماه",
+                        color = Color.White.copy(alpha = 0.82f),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    AnimatedMoneyText(
+                        amount = stats.monthlyCommitment,
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                        suffix = "تومان"
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = Color.White.copy(alpha = 0.16f)
+                ) {
+                    Text(
+                        text = "${activeCount.faDigits()} قسط جاری",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
             }
 
-            val animatedHeroProgress by animateFloatAsState(
+            // سطر دوم: نوار پیشرفت تسویه
+            val animatedProgress by animateFloatAsState(
                 targetValue = (stats.overallHealthPercentage / 100f).coerceIn(0f, 1f),
                 animationSpec = spring(dampingRatio = 0.75f, stiffness = 300f),
-                label = "HeroDebtProgressAnim"
+                label = "hero_progress"
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 LinearProgressIndicator(
-                    progress = { animatedHeroProgress },
+                    progress = { animatedProgress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(7.dp)
+                        .height(8.dp)
                         .clip(RoundedCornerShape(50)),
-                    color = if (isDark) MossLight else Color.White,
-                    trackColor = if (isDark) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.22f)
+                    color = if (isDark) MossLight else Color(0xFF4ADE80),
+                    trackColor = Color.White.copy(alpha = 0.18f)
                 )
 
                 Row(
@@ -1123,93 +1131,61 @@ private fun HeroDebtSummaryCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        "پرداخت شده ${stats.overallHealthPercentage.toInt().faDigits()}٪",
-                        color = Color.White.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+                        text = "${stats.overallHealthPercentage.toInt().faDigits()}٪ تسویه کل",
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                     )
 
-                    if (totalCount > 0) {
+                    Text(
+                        text = "مانده کل: ${stats.totalActiveDebt.money()} ت",
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
+
+            // سطر سوم: پیل سررسید بعدی
+            if (nextItem != null) {
+                val due = LocalDate.ofEpochDay(nextItem.dueEpochDay)
+                val daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), due)
+
+                Surface(
+                    onClick = { onNextItemClick?.invoke(nextItem) },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White.copy(alpha = 0.14f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text("🔔", fontSize = 13.sp)
+                            Text(
+                                text = "سررسید بعدی: ${nextItem.title}",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                        }
+
                         Text(
-                            "قسط ${paidCount.faDigits()} از ${totalCount.faDigits()}",
-                            color = Color.White.copy(alpha = 0.8f),
-                            style = MaterialTheme.typography.labelMedium
+                            text = when {
+                                daysLeft > 1 -> "${due.formatJalali()} (${daysLeft.toInt().faDigits()} روز)"
+                                daysLeft == 1L -> "فردا ⚡"
+                                daysLeft == 0L -> "امروز ⚠️"
+                                else -> "${(-daysLeft).toInt().faDigits()} روز تاخیر 🚨"
+                            },
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = if (daysLeft < 0) Color(0xFFFF8A80) else Color.White.copy(alpha = 0.95f)
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-/**
- * کارت تونال قسط بعدی (Next Due Tonal Card)
- */
-@Composable
-private fun NextDueTonalCard(active: List<Installment>) {
-    val next = active.firstOrNull() ?: return
-    val due = LocalDate.ofEpochDay(next.dueEpochDay)
-    val daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), due)
-    val category = InstallmentCategories.get(next.category)
-    val isDark = isSystemInDarkTheme()
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .bounceClick(minScale = 0.98f),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isDark) MaterialTheme.colorScheme.surfaceContainerHigh else MintSoft.copy(alpha = 0.85f)
-        ),
-        border = BorderStroke(
-            1.dp,
-            if (isDark) MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f) else MintSoft
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = RoundedCornerShape(18.dp),
-                color = if (isDark) MaterialTheme.colorScheme.surfaceContainerHighest else Color.White,
-                modifier = Modifier.size(50.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(category.emoji, fontSize = 24.sp)
-                }
-            }
-
-            Spacer(Modifier.width(14.dp))
-
-            Column(Modifier.weight(1f)) {
-                Text(
-                    "قسط بعدی — ${next.title}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.height(2.dp))
-                AnimatedMoneyText(
-                    amount = next.amount,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isDark) MossLight else Moss,
-                    suffix = "تومان"
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    when {
-                        daysLeft > 1 -> "${due.formatJalali()} (${daysLeft.toInt().faDigits()} روز دیگر)"
-                        daysLeft == 1L -> "فردا (${due.formatJalali()}) 🔔"
-                        daysLeft == 0L -> "امروز موعد پرداخت است (${due.formatJalali()}) ⚠️"
-                        else -> "${(-daysLeft).toInt().faDigits()} روز تاخیر! (${due.formatJalali()}) 🚨"
-                    },
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                    color = if (daysLeft < 0) Coral else MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
