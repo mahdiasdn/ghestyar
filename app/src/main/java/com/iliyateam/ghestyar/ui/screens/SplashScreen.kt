@@ -152,27 +152,26 @@ fun SplashScreen(onFinish: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.height(42.dp))
 
-            // نوار باریک پیشرفت لودینگ فنری
+            // لودینگ دایره‌ای کرلی و موج‌دار متریال ۳ اکسپرسیو (Wavy / Curly Circular Indicator)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.width(200.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                LinearProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(50)),
+                com.iliyateam.ghestyar.ui.components.M3ExpressiveCurlyLoadingIndicator(
+                    size = 58.dp,
                     color = Moss,
-                    trackColor = MintSoft.copy(alpha = 0.4f)
+                    secondaryColor = MossLight,
+                    waveCount = 6,
+                    waveAmplitude = 4.5.dp,
+                    strokeWidth = 5.dp,
+                    progress = animatedProgress
                 )
 
                 Text(
-                    "در حال بارگذاری اطلاعات...",
-                    style = MaterialTheme.typography.labelMedium,
+                    text = "در حال بارگذاری اطلاعات...",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

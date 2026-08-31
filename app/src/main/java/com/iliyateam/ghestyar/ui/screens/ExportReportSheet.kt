@@ -296,7 +296,12 @@ fun ExportReportSheet(
                         .bounceClick(minScale = 0.96f)
                 ) {
                     if (isExporting) {
-                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        com.iliyateam.ghestyar.ui.components.M3ExpressiveCurlyLoadingIndicator(
+                            size = 22.dp,
+                            strokeWidth = 2.5.dp,
+                            waveAmplitude = 1.8.dp,
+                            color = Moss
+                        )
                     } else {
                         Icon(Icons.Rounded.Share, null, modifier = Modifier.size(18.dp))
                     }
