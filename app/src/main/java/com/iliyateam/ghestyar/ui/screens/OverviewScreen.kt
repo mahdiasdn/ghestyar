@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -482,6 +483,7 @@ private fun DashboardFinancialSummaryHub(
     val isPositive = cashflow.remainingAfterInstallments >= 0
     val totalInflow = cashflow.totalMonthlyInflow
     val totalOutflow = cashflow.totalMonthlyOutflow
+    val isDark = isSystemInDarkTheme()
 
     Column(
         modifier = Modifier
@@ -490,18 +492,18 @@ private fun DashboardFinancialSummaryHub(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // ۱. کارت اصلی هیرو تراز نهایی ماهانه (Hero Net Balance Hub)
-        Card(
+        Surface(
             onClick = onOpenCashflow,
             modifier = Modifier
                 .fillMaxWidth()
                 .bounceClick(minScale = 0.98f),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            shape = RoundedCornerShape(26.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             border = BorderStroke(
                 1.dp,
                 if (isPositive) Moss.copy(alpha = 0.35f) else Coral.copy(alpha = 0.35f)
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            shadowElevation = 2.dp
         ) {
             Box(
                 modifier = Modifier
@@ -528,9 +530,9 @@ private fun DashboardFinancialSummaryHub(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Surface(
-                                shape = CircleShape,
+                                shape = RoundedCornerShape(12.dp),
                                 color = (if (isPositive) Moss else Coral).copy(alpha = 0.18f),
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(34.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
@@ -543,14 +545,13 @@ private fun DashboardFinancialSummaryHub(
                             }
                             Column {
                                 Text(
-                                    "مانده خالص نقدینگی ماه",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
+                                    text = "مانده خالص نقدینگی ماه",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    "کسر تمام مخارج، اقساط و چک‌ها از درآمدها",
-                                    style = MaterialTheme.typography.labelMedium,
+                                    text = "کسر مخارج و اقساط از درآمدها",
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -562,8 +563,8 @@ private fun DashboardFinancialSummaryHub(
                             border = BorderStroke(0.8.dp, (if (isPositive) Moss else Coral).copy(alpha = 0.4f))
                         ) {
                             Text(
-                                if (isPositive) "تراز مثبت ماه 📈" else "کسری بودجه 📉",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                text = if (isPositive) "تراز مثبت 📈" else "کسری بودجه 📉",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = if (isPositive) Moss else Coral,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
@@ -578,14 +579,13 @@ private fun DashboardFinancialSummaryHub(
                         AnimatedMoneyText(
                             amount = cashflow.remainingAfterInstallments,
                             isPrivacy = isPrivacy,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isPositive) Moss else Coral
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                            color = if (isPositive) (if (isDark) MossLight else Moss) else Coral
                         )
                         if (!isPrivacy) {
                             Text(
-                                "تومان",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                text = "تومان",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
@@ -594,7 +594,7 @@ private fun DashboardFinancialSummaryHub(
 
                     // نوار نمایش شفاف فرمول تفکیکی
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -607,17 +607,17 @@ private fun DashboardFinancialSummaryHub(
                         ) {
                             Text(
                                 text = if (isPrivacy) "ورودی‌ها: ••••••" else "کل ورودی: ${totalInflow.money()} ت",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = Moss
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = if (isDark) MossLight else Moss
                             )
                             Text(
                                 text = "—",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = if (isPrivacy) "تعهدات: ••••••" else "کل خروجی: ${totalOutflow.money()} ت",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = Coral
                             )
                         }
@@ -631,7 +631,6 @@ private fun DashboardFinancialSummaryHub(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ۱. کل درآمدها
             OverviewStatCard(
                 modifier = Modifier.weight(1f),
                 title = "درآمدهای ماه",
@@ -641,7 +640,6 @@ private fun DashboardFinancialSummaryHub(
                 subText = if (cashflow.thisMonthReceivableCheques > 0) "+${cashflow.thisMonthReceivableCheques.money()} طلب" else "درآمد جاری"
             )
 
-            // ۲. هزینه‌ها و مخارج
             OverviewStatCard(
                 modifier = Modifier.weight(1f),
                 title = "مخارج و هزینه‌ها",
@@ -656,7 +654,6 @@ private fun DashboardFinancialSummaryHub(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ۳. اقساط وام‌ها
             OverviewStatCard(
                 modifier = Modifier.weight(1f),
                 title = "اقساط این ماه",
@@ -666,14 +663,13 @@ private fun DashboardFinancialSummaryHub(
                 subText = "${activeInstallmentsCount.faDigits()} قسط فعال"
             )
 
-            // ۴. چک‌ها و بدهی‌ها
             OverviewStatCard(
                 modifier = Modifier.weight(1f),
                 title = "چک‌ها و بدهی‌ها",
                 value = if (isPrivacy) "••••••" else "${cashflow.thisMonthPayableCheques.money()} ت",
                 icon = Icons.Rounded.HistoryEdu,
                 tint = ChequeBlue,
-                subText = if (cashflow.thisMonthReceivableCheques > 0) "${pendingChequesCount.faDigits()} چک • طلب دار" else "${pendingChequesCount.faDigits()} چک در انتظار"
+                subText = if (cashflow.thisMonthReceivableCheques > 0) "${pendingChequesCount.faDigits()} چک • طلب‌دار" else "${pendingChequesCount.faDigits()} چک در انتظار"
             )
         }
     }
@@ -688,12 +684,15 @@ private fun OverviewStatCard(
     tint: Color,
     subText: String
 ) {
-    Card(
+    val isDark = isSystemInDarkTheme()
+
+    Surface(
         modifier = modifier
             .bounceClick(minScale = 0.96f),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+        shadowElevation = 1.dp
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -705,7 +704,7 @@ private fun OverviewStatCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    shape = CircleShape,
+                    shape = RoundedCornerShape(10.dp),
                     color = tint.copy(alpha = 0.12f),
                     modifier = Modifier.size(32.dp)
                 ) {
@@ -713,14 +712,21 @@ private fun OverviewStatCard(
                         Icon(icon, null, tint = tint, modifier = Modifier.size(16.dp))
                     }
                 }
-                Text(subText, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = tint)
+                Text(
+                    text = subText,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (isDark && tint == Moss) MossLight else tint
+                )
             }
 
-            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
-                value,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
