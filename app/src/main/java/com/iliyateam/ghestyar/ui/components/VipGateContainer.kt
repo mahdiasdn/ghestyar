@@ -105,8 +105,7 @@ fun VipGateContainer(
                             Surface(shape = RoundedCornerShape(50), color = GoldVip.copy(alpha = 0.2f)) {
                                 Text(
                                     "⭐ VIP",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     color = GoldVip,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
@@ -115,10 +114,9 @@ fun VipGateContainer(
 
                         Text(
                             featureDescription,
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 18.sp
+                            textAlign = TextAlign.Center
                         )
                     }
 
@@ -136,8 +134,7 @@ fun VipGateContainer(
                             Icon(Icons.Rounded.Lock, null, tint = GoldVip, modifier = Modifier.size(20.dp))
                             Text(
                                 "این ابزار ویژه خریداران نسخه طلایی قسط‌یار است.",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -156,8 +153,7 @@ fun VipGateContainer(
                         Spacer(Modifier.width(6.dp))
                         Text(
                             "مشاهده پلن‌ها و ارتقا به نسخه طلایی 👑",
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                             color = Color.Black
                         )
                     }

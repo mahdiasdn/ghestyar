@@ -167,7 +167,7 @@ fun AddInstallmentScreen(
                             selected = isSelected,
                             onClick = { category = cat.id },
                             leadingIcon = { Text(cat.emoji, fontSize = 13.sp) },
-                            label = { Text(cat.title, fontSize = 11.sp) },
+                            label = { Text(cat.title, style = MaterialTheme.typography.labelLarge) },
                             shape = RoundedCornerShape(50),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Moss,
@@ -208,7 +208,7 @@ fun AddInstallmentScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { destination = if (isSelected) "" else sugg },
-                            label = { Text(sugg, fontSize = 10.sp) },
+                            label = { Text(sugg, style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(50),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer else MintSoft,
@@ -264,8 +264,7 @@ fun AddInstallmentScreen(
                             Text("✍️", fontSize = 12.sp)
                             Text(
                                 "معادل: ${amount.toPersianWords("تومان")}",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                                 color = if (isDark) MossLight else MossDeep
                             )
                         }
@@ -284,7 +283,7 @@ fun AddInstallmentScreen(
                                 val cur = amountDigits.toLongOrNull() ?: 0L
                                 amountDigits = (cur + inc).toString()
                             },
-                            label = { Text("+${inc.money()}", fontSize = 10.sp) },
+                            label = { Text("+${inc.money()}", style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(50)
                         )
                     }
@@ -311,11 +310,11 @@ fun AddInstallmentScreen(
                     ) {
                         Surface(shape = CircleShape, color = MintSoft, modifier = Modifier.size(32.dp)) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text("#", fontWeight = FontWeight.Bold, color = Moss, fontSize = 16.sp)
+                                Text("#", fontWeight = FontWeight.Bold, color = Moss, style = MaterialTheme.typography.titleLarge)
                             }
                         }
                         Column {
-                            Text("تعداد اقساط", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("تعداد اقساط", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${sessions.faDigits()} قسط", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Moss)
                         }
                     }
@@ -359,7 +358,7 @@ fun AddInstallmentScreen(
                     ) {
                         Icon(Icons.Rounded.CalendarMonth, null, tint = Moss, modifier = Modifier.size(22.dp))
                         Column {
-                            Text("تاریخ اولین قسط", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("تاریخ اولین قسط", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
                                 due.toLocalDate().formatJalali(),
                                 style = MaterialTheme.typography.titleMedium,
@@ -375,8 +374,7 @@ fun AddInstallmentScreen(
                     ) {
                         Text(
                             "تغییر تاریخ",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                             color = Moss,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
@@ -417,8 +415,9 @@ fun AddInstallmentScreen(
                                     }
                                     Text(
                                         label,
-                                        fontSize = 11.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        ),
                                         color = if (isSelected) (if (isDark) MossLight else Moss) else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -440,16 +439,15 @@ fun AddInstallmentScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("قسط ماهانه شما:", fontSize = 11.sp, color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF22304C), fontWeight = FontWeight.Medium)
+                    Text("قسط ماهانه شما:", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium), color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF22304C))
                     Text(
                         "${amount.money()} تومان",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         color = if (isDark) MossLight else Color(0xFF0E1A36)
                     )
                     Text(
                         "مبلغ کل در ${sessions.faDigits()} قسط: ${(amount * sessions).money()} تومان",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF3A4764)
                     )
                 }
@@ -477,7 +475,7 @@ fun AddInstallmentScreen(
                         )
                         Text(
                             "اعلان در ۳ روز قبل، ۱ روز قبل و صبح روز سررسید",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -529,8 +527,7 @@ fun AddInstallmentScreen(
             ) {
                 Text(
                     if (isEditMode) "ذخیره تغییرات" else "ذخیره طرح",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
             }
@@ -539,7 +536,7 @@ fun AddInstallmentScreen(
                 onClick = onBack,
                 modifier = Modifier.bounceClick(minScale = 0.94f)
             ) {
-                Text("انصراف", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("انصراف", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

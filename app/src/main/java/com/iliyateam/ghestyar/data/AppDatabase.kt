@@ -18,7 +18,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         LoanPool::class,
         LoanPoolMember::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -41,8 +41,8 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("CREATE TABLE IF NOT EXISTS `savings_goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `targetAmount` INTEGER NOT NULL, `currentAmount` INTEGER NOT NULL, `emoji` TEXT NOT NULL, `colorIndex` INTEGER NOT NULL, `targetEpochDay` INTEGER, `profileId` INTEGER NOT NULL DEFAULT 1)")
-                db.execSQL("CREATE TABLE IF NOT EXISTS `cheques_or_debts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `amount` INTEGER NOT NULL, `dueEpochDay` INTEGER NOT NULL, `isCheque` INTEGER NOT NULL, `isPayable` INTEGER NOT NULL, `isCleared` INTEGER NOT NULL, `sayadNumber` TEXT NOT NULL, `bankName` TEXT NOT NULL, `contactPerson` TEXT NOT NULL, `note` TEXT NOT NULL, `profileId` INTEGER NOT NULL DEFAULT 1)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `savings_goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `targetAmount` INTEGER NOT NULL, `currentAmount` INTEGER NOT NULL, `targetEpochDay` INTEGER NOT NULL, `emoji` TEXT NOT NULL, `colorIndex` INTEGER NOT NULL, `note` TEXT NOT NULL DEFAULT '', `profileId` INTEGER NOT NULL DEFAULT 1)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `cheques_and_debts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `personName` TEXT NOT NULL, `amount` INTEGER NOT NULL, `isCheque` INTEGER NOT NULL, `isReceivable` INTEGER NOT NULL, `dueEpochDay` INTEGER NOT NULL, `isCleared` INTEGER NOT NULL, `chequeNumber` TEXT NOT NULL, `bankName` TEXT NOT NULL, `note` TEXT NOT NULL, `profileId` INTEGER NOT NULL DEFAULT 1)")
             }
         }
 
@@ -81,6 +81,20 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                try {
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_installments_profileId` ON `installments` (`profileId`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_installments_dueEpochDay` ON `installments` (`dueEpochDay`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_transactions_profileId` ON `transactions` (`profileId`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_transactions_epochDay` ON `transactions` (`epochDay`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_savings_goals_profileId` ON `savings_goals` (`profileId`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_cheques_and_debts_profileId` ON `cheques_and_debts` (`profileId`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_cheques_and_debts_dueEpochDay` ON `cheques_and_debts` (`dueEpochDay`)")
+                } catch (_: Exception) {}
+            }
+        }
+
         fun get(ctx: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -88,8 +102,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "ghestyar.db"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
-                .fallbackToDestructiveMigrationOnDowngrade()
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                .fallbackToDestructiveMigration()
                 .build().also { INSTANCE = it }
             }
     }

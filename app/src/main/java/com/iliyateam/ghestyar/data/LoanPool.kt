@@ -100,6 +100,9 @@ interface LoanPoolDao {
     @Query("SELECT * FROM loan_pool_members")
     suspend fun getAllMembers(): List<LoanPoolMember>
 
+    @Query("DELETE FROM loan_pools WHERE profileId = :profileId")
+    suspend fun deletePoolsByProfileId(profileId: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllPools(pools: List<LoanPool>): List<Long>
 

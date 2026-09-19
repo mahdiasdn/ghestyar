@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import com.iliyateam.ghestyar.ui.components.AppLogo
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -79,7 +80,7 @@ fun AboutScreen(onBack: () -> Unit) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("قسط‌یار", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
-                Text("دستیار جامع مدیریت اقساط و آرامش مالی", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("دستیار جامع مدیریت اقساط و آرامش مالی", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(10.dp))
                 Surface(
                     shape = RoundedCornerShape(50),
@@ -88,8 +89,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 ) {
                     Text(
                         "نسخه ۱.۰",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 22.dp, vertical = 6.dp)
                     )
@@ -119,9 +119,9 @@ fun AboutScreen(onBack: () -> Unit) {
                     }
 
                     Column(Modifier.weight(1f)) {
-                        Text("توسعه‌دهنده", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("توسعه‌دهنده", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("MightyMahdi", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Moss)
-                        Text("طراحی شده با عشق برای آرامش مالی شما ❤️", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("طراحی شده با عشق برای آرامش مالی شما ❤️", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -145,7 +145,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     AboutLinkRow(
                         title = "صفحه قسط‌یار در مایکت 📲",
                         subtitle = "مشاهده صفحه رسمی برنامه در استور مایکت",
-                        icon = Icons.Rounded.OpenInNew,
+                        icon = Icons.AutoMirrored.Rounded.OpenInNew,
                         onClick = { openMyketDetails(context) }
                     )
 
@@ -190,9 +190,8 @@ fun AboutScreen(onBack: () -> Unit) {
                     Text("حفظ حریم خصوصی و امنیت داده‌ها 🛡️", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Text(
                         "تمام اطلاعات مالی، اقساط، چک‌ها و تراکنش‌های شما به صورت ۱۰۰٪ آفلاین و درون گوشی خودتان ذخیره می‌شود و هیچ اطلاعاتی به هیچ سروری ارسال نمی‌گردد.",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 18.sp
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -222,7 +221,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Moss)
                 ) {
-                    Text("بازگشت به برنامه", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("بازگشت به برنامه", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
                 }
             }
         }
@@ -241,8 +240,7 @@ fun AboutScreen(onBack: () -> Unit) {
             text = {
                 Text(
                     "آیا از کار با قسط‌یار رضایت دارید؟\nبا ثبت نظر و امتیاز ۵ ستاره در مایکت، انرژی زیادی به ما برای افزودن امکانات جذاب‌تر می‌دهید. ❤️",
-                    fontSize = 13.sp,
-                    lineHeight = 22.sp
+                    style = MaterialTheme.typography.bodyMedium
                 )
             },
             confirmButton = {
@@ -291,7 +289,7 @@ private fun AboutLinkRow(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-                Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.Rounded.ChevronLeft, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         }

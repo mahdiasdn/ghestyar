@@ -42,49 +42,6 @@ data class FullBackupData(
     val loanPoolMembers: List<LoanPoolMember> = emptyList()
 )
 
-enum class SubscriptionTier(
-    val id: String,
-    val title: String,
-    val priceFormatted: String,
-    val durationText: String,
-    val discountBadge: String? = null
-) {
-    MONTHLY("monthly", "اشتراک ۱ ماهه", "۴۹٬۰۰۰", "ماهانه"),
-    QUARTERLY("quarterly", "اشتراک ۳ ماهه", "۱۱۹٬۰۰۰", "۳ ماهه", "۲۰٪ تخفیف"),
-    YEARLY("yearly", "اشتراک ۱ ساله (پیشنهادی)", "۲۹۹٬۰۰۰", "سالانه", "۵۰٪ تخفیف ویژه 🔥"),
-    LIFETIME("lifetime", "اشتراک مادام‌العمر VIP", "۵۹۰٬۰۰۰", "یک‌بار برای همیشه", "ارزش استثنایی")
-}
-
-object Premium {
-    const val MAX_FREE_ACTIVE_INSTALLMENTS = 4
-
-    private const val PREF_NAME = "ghestyar_pref"
-    private const val KEY_PREMIUM = "is_premium"
-    private const val KEY_PLAN_ID = "premium_plan_id"
-    private const val KEY_UNLOCKED_AT = "premium_unlocked_at"
-
-    fun isPremium(ctx: Context): Boolean =
-        ctx.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).getBoolean(KEY_PREMIUM, false)
-
-    fun setPremium(ctx: Context, enabled: Boolean, plan: SubscriptionTier = SubscriptionTier.YEARLY) {
-        ctx.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).edit()
-            .putBoolean(KEY_PREMIUM, enabled)
-            .putString(KEY_PLAN_ID, if (enabled) plan.id else "")
-            .putLong(KEY_UNLOCKED_AT, if (enabled) System.currentTimeMillis() else 0L)
-            .apply()
-    }
-
-    fun getActivePlan(ctx: Context): SubscriptionTier? {
-        if (!isPremium(ctx)) return null
-        val id = ctx.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).getString(KEY_PLAN_ID, "")
-        return SubscriptionTier.entries.firstOrNull { it.id == id } ?: SubscriptionTier.YEARLY
-    }
-
-    fun canAddMoreInstallments(ctx: Context, currentActiveCount: Int): Boolean {
-        return isPremium(ctx) || currentActiveCount < MAX_FREE_ACTIVE_INSTALLMENTS
-    }
-}
-
 object Exporter {
 
     /**
@@ -206,7 +163,7 @@ object Exporter {
 
             // Row 1: Banner Title
             appendLine("""<row r="1" ht="30" customHeight="1">""")
-            appendLine("""<c r="A1" s="1" t="inlineStr"><is><t>قسط‌یار • گزارش جامع اقساط و تعهدات مالی ($titleScope)</t></is></c>""")
+            appendLine("""<c r="A1" s="1" t="inlineStr"><is><t>قسط‌یار • گزارش جامع اقساط و تعهدات مالی (${escapeXml(titleScope)})</t></is></c>""")
             appendLine("""</row>""")
 
             // Row 2: Subtitle
@@ -226,12 +183,12 @@ object Exporter {
             // Rows: Data
             items.forEachIndexed { idx, item ->
                 val r = idx + 5
-                val cleanTitle = item.title.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
-                val cleanDest = (if (item.destination.isBlank()) "—" else item.destination).replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
-                val catTitle = InstallmentCategories.get(item.category).title
+                val cleanTitle = escapeXml(item.title)
+                val cleanDest = escapeXml(if (item.destination.isBlank()) "—" else item.destination)
+                val catTitle = escapeXml(InstallmentCategories.get(item.category).title)
                 val due = LocalDate.ofEpochDay(item.dueEpochDay).formatJalali()
                 val paidDate = item.paidAtEpochDay?.let { LocalDate.ofEpochDay(it).formatJalali() } ?: "—"
-                val cleanNote = (if (item.note.isBlank()) "—" else item.note).replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
+                val cleanNote = escapeXml(if (item.note.isBlank()) "—" else item.note)
                 val statusStyle = if (item.isPaid) "6" else "7"
                 val statusText = if (item.isPaid) "تسویه‌شده" else "در جریان"
 
@@ -282,10 +239,23 @@ object Exporter {
         zip.finish()
     }
 
+    private fun escapeXml(str: String): String =
+        str.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
+
     /**
      * خروجی رسمی PDF با فرمت استاندارد A4، سربرگ گرافیکی، کارت‌های خلاصه و جدول رسمی
      */
     fun pdf(ctx: Context, uri: Uri, items: List<Installment>, titleScope: String = "همه اقساط") {
+        ctx.contentResolver.openOutputStream(uri)?.use { out ->
+            writePdfStream(out, items, titleScope)
+        }
+    }
+
+    private fun writePdfStream(outStream: OutputStream, items: List<Installment>, titleScope: String) {
         val pdfDoc = PdfDocument()
 
         val pageWidth = 595
@@ -400,25 +370,27 @@ object Exporter {
             paint.color = Color.rgb(238, 246, 242)
             canvas.drawRoundRect(RectF(margin, currentY, pageWidth - margin, currentY + tableHeaderHeight), 6f, 6f, paint)
 
-            var colX = pageWidth - margin
-            colTitles.forEachIndexed { idx, colTitle ->
-                val w = colWidths[idx]
-                canvas.drawText(colTitle, colX - (w / 2), currentY + 15f, headerPaint)
-                colX -= w
+            var hx = pageWidth - margin
+            colTitles.forEachIndexed { i, title ->
+                val w = colWidths[i]
+                canvas.drawText(title, hx - (w / 2), currentY + 16f, headerPaint)
+                hx -= w
             }
 
-            currentY += tableHeaderHeight + 2f
+            currentY += tableHeaderHeight + 4f
 
-            val startIndex = pageIndex * itemsPerPage
-            val endIndex = (startIndex + itemsPerPage).coerceAtMost(items.size)
-            val pageItems = items.subList(startIndex, endIndex)
+            // ردیف‌های داده
+            val startIdx = pageIndex * itemsPerPage
+            val endIdx = minOf(startIdx + itemsPerPage, items.size)
+            val rowHeight = 26f
 
-            val rowHeight = 24f
-            pageItems.forEachIndexed { i, item ->
-                val isEven = i % 2 == 0
+            for (idx in startIdx until endIdx) {
+                val item = items[idx]
+                val isEven = (idx - startIdx) % 2 == 0
+
                 if (isEven) {
-                    paint.color = Color.rgb(250, 252, 250)
-                    canvas.drawRect(RectF(margin, currentY, pageWidth - margin, currentY + rowHeight), paint)
+                    paint.color = Color.rgb(248, 250, 252)
+                    canvas.drawRect(margin, currentY, pageWidth - margin, currentY + rowHeight, paint)
                 }
 
                 paint.color = Color.rgb(241, 245, 249)
@@ -426,47 +398,46 @@ object Exporter {
 
                 var x = pageWidth - margin
 
-                // ۱. ردیف
-                canvas.drawText((startIndex + i + 1).toString(), x - (colWidths[0] / 2), currentY + 15f, centerTextPaint)
+                // ۰. ردیف
+                canvas.drawText("${idx + 1}", x - (colWidths[0] / 2), currentY + 15f, centerTextPaint)
                 x -= colWidths[0]
 
-                // ۲. عنوان وام
-                val titleTrunc = if (item.title.length > 18) item.title.take(16) + ".." else item.title
-                canvas.drawText(titleTrunc, x - 4f, currentY + 15f, textPaint)
+                // ۱. عنوان وام
+                val displayTitle = if (item.title.length > 20) item.title.take(18) + "…" else item.title
+                canvas.drawText(displayTitle, x - 4f, currentY + 15f, textPaint)
                 x -= colWidths[1]
 
-                // ۳. مقصد/بانک
-                val destTrunc = (if (item.destination.isBlank()) "—" else item.destination).let { if (it.length > 13) it.take(11) + ".." else it }
-                canvas.drawText(destTrunc, x - (colWidths[2] / 2), currentY + 15f, centerTextPaint)
+                // ۲. مقصد / بانک
+                val destText = if (item.destination.isBlank()) "—" else if (item.destination.length > 14) item.destination.take(12) + "…" else item.destination
+                canvas.drawText(destText, x - 4f, currentY + 15f, textPaint)
                 x -= colWidths[2]
 
-                // ۴. دسته
-                val catTitle = InstallmentCategories.get(item.category).title
-                canvas.drawText(catTitle, x - (colWidths[3] / 2), currentY + 15f, centerTextPaint)
+                // ۳. دسته
+                val catText = InstallmentCategories.get(item.category).title
+                canvas.drawText(catText, x - (colWidths[3] / 2), currentY + 15f, centerTextPaint)
                 x -= colWidths[3]
 
-                // ۵. مبلغ قسط
-                canvas.drawText("${item.amount.money()} ت", x - (colWidths[4] / 2), currentY + 15f, centerTextPaint)
+                // ۴. مبلغ قسط
+                canvas.drawText(item.amount.money(), x - 4f, currentY + 15f, textPaint)
                 x -= colWidths[4]
 
-                // ۶. پیشرفت
-                val progText = "${item.paidSessions} از ${item.totalSessions}"
-                canvas.drawText(progText, x - (colWidths[5] / 2), currentY + 15f, centerTextPaint)
+                // ۵. پیشرفت اقساط
+                canvas.drawText("${item.paidSessions}/${item.totalSessions}", x - (colWidths[5] / 2), currentY + 15f, centerTextPaint)
                 x -= colWidths[5]
 
-                // ۷. مانده بدهی
-                canvas.drawText("${item.remainingAmount.money()} ت", x - (colWidths[6] / 2), currentY + 15f, centerTextPaint)
+                // ۶. مانده بدهی
+                canvas.drawText(item.remainingAmount.money(), x - 4f, currentY + 15f, textPaint)
                 x -= colWidths[6]
 
-                // ۸. سررسید
-                val dueDate = LocalDate.ofEpochDay(item.dueEpochDay).formatJalali()
-                canvas.drawText(dueDate, x - (colWidths[7] / 2), currentY + 15f, centerTextPaint)
+                // ۷. سررسید
+                val dueStr = LocalDate.ofEpochDay(item.dueEpochDay).formatJalali()
+                canvas.drawText(dueStr, x - (colWidths[7] / 2), currentY + 15f, centerTextPaint)
                 x -= colWidths[7]
 
-                // ۹. وضعیت
+                // ۸. وضعیت
                 val statusPaint = Paint(centerTextPaint).apply {
                     typeface = Typeface.DEFAULT_BOLD
-                    textSize = 7.5f
+                    textSize = 8f
                     color = if (item.isPaid) Color.rgb(31, 122, 84) else Color.rgb(217, 119, 6)
                 }
                 canvas.drawText(if (item.isPaid) "تسویه" else "فعال", x - (colWidths[8] / 2), currentY + 15f, statusPaint)
@@ -484,9 +455,7 @@ object Exporter {
             pdfDoc.finishPage(page)
         }
 
-        ctx.contentResolver.openOutputStream(uri)?.use { out ->
-            pdfDoc.writeTo(out)
-        }
+        pdfDoc.writeTo(outStream)
         pdfDoc.close()
     }
 
@@ -501,8 +470,9 @@ object Exporter {
         val tempFile = File(reportsDir, fileName)
 
         if (isPdf) {
-            val pUri = Uri.fromFile(tempFile)
-            pdf(ctx, pUri, items, titleScope)
+            FileOutputStream(tempFile).use { fos ->
+                writePdfStream(fos, items, titleScope)
+            }
         } else {
             FileOutputStream(tempFile).use { fos ->
                 writeXlsxZip(fos, items, titleScope)
@@ -524,7 +494,7 @@ object Exporter {
     fun jsonBackup(ctx: Context, uri: Uri, data: FullBackupData) {
         ctx.contentResolver.openOutputStream(uri)?.use { out ->
             val root = JSONObject()
-            root.put("version", 3)
+            root.put("version", data.version)
             root.put("timestamp", System.currentTimeMillis())
 
             // ۱. اقساط

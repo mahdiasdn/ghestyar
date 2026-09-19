@@ -471,11 +471,11 @@ fun QestYarTheme(
     )
 }
 
-fun urgencyColor(daysLeft: Long): Color = when {
-    daysLeft < 0   -> Coral
-    daysLeft == 0L -> Color(0xFFE11D48)
-    daysLeft <= 2  -> Color(0xFFEA580C)
+fun urgencyColor(daysLeft: Long, isDark: Boolean = false): Color = when {
+    daysLeft < 0   -> if (isDark) Color(0xFFFFB4AB) else Coral
+    daysLeft == 0L -> if (isDark) Color(0xFFFB7185) else Color(0xFFE11D48)
+    daysLeft <= 2  -> if (isDark) Color(0xFFFB923C) else Color(0xFFEA580C)
     daysLeft <= 5  -> GoldVip
-    daysLeft <= 10 -> Color(0xFF65A30D)
-    else           -> Moss
+    daysLeft <= 10 -> if (isDark) Color(0xFFA3E635) else Color(0xFF65A30D)
+    else           -> if (isDark) MossLight else Moss
 }

@@ -69,12 +69,14 @@ class GhestYarWidgetProvider : AppWidgetProvider() {
     ) {
         try {
             val db = AppDatabase.get(context)
+            val prefs = context.getSharedPreferences("ghestyar_settings", Context.MODE_PRIVATE)
+            val activeProfileId = prefs.getLong("active_profile_id", 1L)
+
             val allList = db.installmentDao().getAll()
-            val activeList = allList.filter { !it.isPaid }.sortedBy { it.dueEpochDay }
+            val activeList = allList.filter { !it.isPaid && it.profileId == activeProfileId }.sortedBy { it.dueEpochDay }
             val nextItem = activeList.firstOrNull()
 
-            val today = LocalDate.now().toEpochDay()
-            val monthlyTotal = activeList.filter { it.dueEpochDay <= today + 30 }.sumOf { it.amount }
+            val monthlyTotal = com.iliyateam.ghestyar.calculateThisMonthInstallmentsCommitment(activeList)
 
             val clickIntent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP

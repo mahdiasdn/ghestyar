@@ -121,7 +121,7 @@ fun CashflowScreen(
                     Text("مدیریت دخل و خرج", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
                         "ماه جاری: ${Jalali.months[JalaliDate.today().jm - 1]} ${JalaliDate.today().jy.faDigits()}",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -136,7 +136,7 @@ fun CashflowScreen(
             ) {
                 Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp), tint = Color.White)
                 Spacer(Modifier.width(4.dp))
-                Text("ثبت دخل/خرج", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color.White)
+                Text("ثبت دخل/خرج", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
             }
         }
 
@@ -212,8 +212,9 @@ fun CashflowScreen(
                                     ) {
                                         Text(
                                             filter.title,
-                                            fontSize = 11.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                            ),
                                             color = textColor
                                         )
                                     }
@@ -242,8 +243,9 @@ fun CashflowScreen(
                                 )
                                 Text(
                                     "دسته‌ها",
-                                    fontSize = 11.sp,
-                                    fontWeight = if (selectedCategoryFilter != null) FontWeight.Bold else FontWeight.Normal,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (selectedCategoryFilter != null) FontWeight.Bold else FontWeight.Normal
+                                    ),
                                     color = if (selectedCategoryFilter != null) Moss else MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -273,7 +275,7 @@ fun CashflowScreen(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
                                         Text(cat.emoji, fontSize = 12.sp)
-                                        Text("فیلتر دسته: ${cat.title}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Moss)
+                                        Text("فیلتر دسته: ${cat.title}", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Moss)
                                         IconButton(
                                             onClick = { selectedCategoryFilter = null },
                                             modifier = Modifier.size(18.dp)
@@ -302,9 +304,9 @@ fun CashflowScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(28.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
                             Text(if (selectedCategoryFilter != null) "🔍" else "📊", fontSize = 42.sp)
                             Text(
                                 if (selectedCategoryFilter != null) "تراکنشی در این دسته‌بندی یافت نشد"
@@ -315,7 +317,7 @@ fun CashflowScreen(
                             )
                             Text(
                                 "برای آگاهی دقیق از مانده دخل و خرج، مبالغ درآمد یا مخارج خود را ثبت نمایید.",
-                                fontSize = 11.sp,
+                                style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
@@ -327,7 +329,7 @@ fun CashflowScreen(
                             ) {
                                 Icon(Icons.Rounded.Add, null, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("ثبت اولین تراکنش ✨", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Text("ثبت اولین تراکنش ✨", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                             }
                         }
                     }
@@ -344,7 +346,7 @@ fun CashflowScreen(
                         Text("ریز تراکنش‌ها", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(
                             "${filteredTransactions.size.faDigits()} تراکنش",
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -389,7 +391,7 @@ fun CashflowScreen(
                             selectedCategoryFilter = null
                             showCategoryFilterSheet = false
                         }) {
-                            Text("پاک کردن فیلتر", color = Coral, fontSize = 11.sp)
+                            Text("پاک کردن فیلتر", color = Coral, style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -426,8 +428,9 @@ fun CashflowScreen(
                                 Text(cat.emoji, fontSize = 20.sp)
                                 Text(
                                     cat.title,
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    ),
                                     color = if (isSelected) (if (cat.isIncome) Moss else Coral) else MaterialTheme.colorScheme.onSurface,
                                     textAlign = TextAlign.Center
                                 )
@@ -543,13 +546,12 @@ private fun EnhancedCashflowDashboardCard(
                             Column {
                                 Text(
                                     "نقدینگی خالص آزاد این ماه",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     "پس از کسر هزینه‌ها و اقساط ماه جاری",
-                                    fontSize = 9.5.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -562,8 +564,7 @@ private fun EnhancedCashflowDashboardCard(
                         ) {
                             Text(
                                 if (isPositive) "تراز مثبت ماه 📈" else "کسری بودجه 📉",
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = if (isPositive) Moss else Coral,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
@@ -583,8 +584,7 @@ private fun EnhancedCashflowDashboardCard(
                         if (!isPrivacy) {
                             Text(
                                 "تومان",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(bottom = 6.dp)
                             )
@@ -618,12 +618,11 @@ private fun EnhancedCashflowDashboardCard(
                                 Icon(Icons.Rounded.ArrowDownward, contentDescription = null, tint = Moss, modifier = Modifier.size(14.dp))
                             }
                         }
-                        Text("کل دریافتی", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                        Text("کل دریافتی", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }
                     Text(
                         formatMoney(cashflow.totalIncome),
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Moss,
                         maxLines = 1
                     )
@@ -649,12 +648,11 @@ private fun EnhancedCashflowDashboardCard(
                                 Icon(Icons.Rounded.ArrowUpward, contentDescription = null, tint = Coral, modifier = Modifier.size(14.dp))
                             }
                         }
-                        Text("مخارج جاری", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                        Text("مخارج جاری", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }
                     Text(
                         formatMoney(cashflow.totalExpense),
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Coral,
                         maxLines = 1
                     )
@@ -685,12 +683,11 @@ private fun EnhancedCashflowDashboardCard(
                                 Icon(Icons.Rounded.AccountBalance, contentDescription = null, tint = Color(0xFF0D9488), modifier = Modifier.size(14.dp))
                             }
                         }
-                        Text("اقساط ماه", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                        Text("اقساط ماه", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }
                     Text(
                         formatMoney(cashflow.thisMonthInstallments),
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color(0xFF0D9488),
                         maxLines = 1
                     )
@@ -716,12 +713,11 @@ private fun EnhancedCashflowDashboardCard(
                                 Icon(Icons.Rounded.HistoryEdu, contentDescription = null, tint = ChequeBlue, modifier = Modifier.size(14.dp))
                             }
                         }
-                        Text("چک‌ها و بدهی", fontSize = 9.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                        Text("چک‌ها و بدهی", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }
                     Text(
                         formatMoney(cashflow.thisMonthPayableCheques),
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = ChequeBlue,
                         maxLines = 1
                     )
@@ -771,8 +767,7 @@ private fun EnhancedCashflowDashboardCard(
                     }
                     Text(
                         "کل خروجی: ${if (isPrivacy) "••••••" else "${totalOutflow.money()} ت"}",
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -830,8 +825,7 @@ private fun EnhancedCashflowDashboardCard(
                                 )
                                 Text(
                                     "مخارج: ${expensePercent.faDigits()}٪",
-                                    fontSize = 9.5.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                     color = Coral
                                 )
                             }
@@ -848,8 +842,7 @@ private fun EnhancedCashflowDashboardCard(
                                 )
                                 Text(
                                     "اقساط: ${installmentPercent.faDigits()}٪",
-                                    fontSize = 9.5.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                     color = Color(0xFF0D9488)
                                 )
                             }
@@ -866,8 +859,7 @@ private fun EnhancedCashflowDashboardCard(
                                 )
                                 Text(
                                     "چک‌ها: ${chequePercent.faDigits()}٪",
-                                    fontSize = 9.5.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                     color = ChequeBlue
                                 )
                             }
@@ -886,9 +878,7 @@ private fun EnhancedCashflowDashboardCard(
                         } else {
                             "پس از کسر تمام ${cashflow.totalExpense.money()} تومان مخارج، ${cashflow.thisMonthInstallments.money()} تومان اقساط و ${cashflow.thisMonthPayableCheques.money()} تومان چک‌های ماه، مبلغ ${cashflow.remainingAfterInstallments.money()} تومان نقدینگی خالص برای شما آزاد می‌ماند."
                         },
-                        fontSize = 10.5.sp,
-                        lineHeight = 16.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                         color = if (isDeficit) Coral else Moss,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                     )
@@ -962,8 +952,7 @@ private fun TransactionRowItem(
                     ) {
                         Text(
                             text = category.title,
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = if (tx.isIncome) Moss else Coral,
                             maxLines = 1,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -977,8 +966,7 @@ private fun TransactionRowItem(
                         ) {
                             Text(
                                 text = "🔄 ماهانه",
-                                fontSize = 8.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary,
                                 maxLines = 1,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -988,7 +976,7 @@ private fun TransactionRowItem(
 
                     Text(
                         text = "${LocalDate.ofEpochDay(tx.epochDay).formatJalali()}${if (tx.note.isNotBlank()) " • ${tx.note}" else ""}",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -1176,8 +1164,7 @@ private fun AddOrEditTransactionDialog(
                         Text("✍️", fontSize = 12.sp)
                         Text(
                             "معادل: ${amount.toPersianWords("تومان")}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                             color = if (isIncome) Moss else Coral
                         )
                     }
@@ -1192,7 +1179,7 @@ private fun AddOrEditTransactionDialog(
                             val cur = amountDigits.toLongOrNull() ?: 0L
                             amountDigits = (cur + qAmount).toString()
                         },
-                        label = { Text("+${qAmount.money()}", fontSize = 10.sp) },
+                        label = { Text("+${qAmount.money()}", style = MaterialTheme.typography.labelMedium) },
                         shape = RoundedCornerShape(50)
                     )
                 }
@@ -1207,7 +1194,7 @@ private fun AddOrEditTransactionDialog(
                         selected = isSelected,
                         onClick = { categoryId = cat.id },
                         leadingIcon = { Text(cat.emoji, fontSize = 12.sp) },
-                        label = { Text(cat.title, fontSize = 11.sp) },
+                        label = { Text(cat.title, style = MaterialTheme.typography.labelMedium) },
                         shape = RoundedCornerShape(50),
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = if (isIncome) Moss else Coral,
@@ -1259,13 +1246,13 @@ private fun AddOrEditTransactionDialog(
                                 if (isIncome) (if (isRecurring) "درآمد ثابت ماهانه" else "درآمد موردی و یک‌باره")
                                 else (if (isRecurring) "هزینه ثابت ماهانه" else "هزینه موردی و یک‌باره"),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 if (isIncome) (if (isRecurring) "محاسبه در پیش‌بینی ۶ ماه آینده (مثل حقوق)" else "فقط مربوط به دخل همین ماه (مثل پاداش)")
                                 else (if (isRecurring) "تکرار مستمر در هر ماه (مثل اجاره یا شارژ)" else "صرفاً خرج همین ماه (مثل خرید یا سفر)"),
-                                fontSize = 9.5.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -1293,8 +1280,7 @@ private fun AddOrEditTransactionDialog(
             ) {
                 Text(
                     if (initialTx != null) "ذخیره تغییرات تراکنش ✅" else if (isIncome) "ثبت درآمد و افزایش موجودی ✅" else "ثبت هزینه و پرداخت ✅",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
             }

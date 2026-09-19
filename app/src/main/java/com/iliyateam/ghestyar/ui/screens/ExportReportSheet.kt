@@ -30,6 +30,9 @@ import com.iliyateam.ghestyar.data.Installment
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.theme.*
 import com.iliyateam.ghestyar.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 enum class ExportTimeFilter(val title: String, val emoji: String) {
@@ -45,11 +48,13 @@ enum class ExportTimeFilter(val title: String, val emoji: String) {
 fun ExportReportSheet(
     allInstallments: List<Installment>,
     onDismiss: () -> Unit,
-    onSaveDocument: (isPdf: Boolean, items: List<Installment>, titleScope: String) -> Unit
+    onSaveDocument: (isPdf: Boolean, items: List<Installment>, filterTitle: String) -> Unit
 ) {
     val context = LocalContext.current
     var isPdfFormat by remember { mutableStateOf(true) } // true: PDF, false: Excel
     var selectedFilter by remember { mutableStateOf(ExportTimeFilter.ALL) }
+    var isExporting by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val todayJalali = remember { JalaliDate.today() }
     val todayEpoch = remember { LocalDate.now().toEpochDay() }
@@ -107,7 +112,7 @@ fun ExportReportSheet(
                     }
                     Column {
                         Text("خروجی و گزارش‌گیری رسمی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("خروجی تفکیک‌شده در قالب PDF و اکسل", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("خروجی تفکیک‌شده در قالب PDF و اکسل", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -148,7 +153,7 @@ fun ExportReportSheet(
                                 fontWeight = FontWeight.Bold,
                                 color = if (isPdfFormat) Moss else MaterialTheme.colorScheme.onSurface
                             )
-                            Text("A4 مصور با جدول و سربرگ", fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("A4 مصور با جدول و سربرگ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -174,7 +179,7 @@ fun ExportReportSheet(
                                 fontWeight = FontWeight.Bold,
                                 color = if (!isPdfFormat) GoldVip else MaterialTheme.colorScheme.onSurface
                             )
-                            Text("فرمت مایکروسافت اکسل، رنگی و فرمول‌دار", fontSize = 8.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("فرمت مایکروسافت اکسل، رنگی و فرمول‌دار", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -204,8 +209,9 @@ fun ExportReportSheet(
                                 Text(filter.emoji, fontSize = 13.sp)
                                 Text(
                                     filter.title,
-                                    fontSize = 11.5.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    ),
                                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -229,9 +235,9 @@ fun ExportReportSheet(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("پیش‌نمایش داده‌های گزارش:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("پیش‌نمایش داده‌های گزارش:", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Surface(shape = RoundedCornerShape(50), color = Moss.copy(alpha = 0.12f)) {
-                            Text("${filteredItems.size.faDigits()} قسط منتخب", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Moss, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+                            Text("${filteredItems.size.faDigits()} قسط منتخب", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = Moss, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
                         }
                     }
 
@@ -240,15 +246,15 @@ fun ExportReportSheet(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("مجموع تعهدات:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("مجموع تعهدات:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${totalSum.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("پرداخت‌شده:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("پرداخت‌شده:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${paidSum.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Moss)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("مانده بدهی:", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("مانده بدهی:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${remainingSum.money()} ت", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Coral)
                         }
                     }
@@ -267,22 +273,40 @@ fun ExportReportSheet(
                             Toast.makeText(context, "هیچ قسطی در این فیلتر وجود ندارد!", Toast.LENGTH_SHORT).show()
                             return@OutlinedButton
                         }
-                        try {
-                            Exporter.shareReportFile(context, filteredItems, isPdfFormat, selectedFilter.title)
-                            onDismiss()
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "خطا در اشتراک‌گذاری: ${e.message}", Toast.LENGTH_SHORT).show()
+                        if (isExporting) return@OutlinedButton
+                        isExporting = true
+                        coroutineScope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    Exporter.shareReportFile(context, filteredItems, isPdfFormat, selectedFilter.title)
+                                }
+                                onDismiss()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "خطا در اشتراک‌گذاری: ${e.message}", Toast.LENGTH_SHORT).show()
+                            } finally {
+                                isExporting = false
+                            }
                         }
                     },
+                    enabled = !isExporting,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
                         .bounceClick(minScale = 0.96f)
                 ) {
-                    Icon(Icons.Rounded.Share, null, modifier = Modifier.size(18.dp))
+                    if (isExporting) {
+                        com.iliyateam.ghestyar.ui.components.M3ExpressiveCurlyLoadingIndicator(
+                            size = 22.dp,
+                            strokeWidth = 2.5.dp,
+                            waveAmplitude = 1.8.dp,
+                            color = Moss
+                        )
+                    } else {
+                        Icon(Icons.Rounded.Share, null, modifier = Modifier.size(18.dp))
+                    }
                     Spacer(Modifier.width(6.dp))
-                    Text("اشتراک مستقیم", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(if (isExporting) "در حال تولید..." else "اشتراک مستقیم", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
                 // دکمه ذخیره فایل در حافظه
@@ -306,8 +330,7 @@ fun ExportReportSheet(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "ذخیره در حافظه",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = if (isPdfFormat) Color.White else Color.Black
                     )
                 }

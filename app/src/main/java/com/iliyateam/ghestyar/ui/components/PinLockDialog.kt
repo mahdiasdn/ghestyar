@@ -24,13 +24,34 @@ import com.iliyateam.ghestyar.ui.theme.Coral
 import com.iliyateam.ghestyar.ui.theme.Moss
 import com.iliyateam.ghestyar.util.faDigits
 
+private const val PIN_SALT = "ghestyar_secure_pin_salt_v1_"
+
+private fun hashPin(pin: String): String {
+    if (pin.isBlank()) return ""
+    return try {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val digest = md.digest((PIN_SALT + pin).toByteArray(Charsets.UTF_8))
+        digest.fold("") { str, it -> str + "%02x".format(it) }
+    } catch (_: Exception) { pin }
+}
+
+private fun simpleHashPin(pin: String): String {
+    if (pin.isBlank()) return ""
+    return try {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(pin.toByteArray(Charsets.UTF_8))
+        digest.fold("") { str, it -> str + "%02x".format(it) }
+    } catch (_: Exception) { pin }
+}
+
 @Composable
 fun PinLockDialog(
     correctPin: String = "",
     onSuccess: () -> Unit = {},
     isSettingMode: Boolean = false,
     onDismiss: () -> Unit = {},
-    onPinSet: (String) -> Unit = {}
+    onPinSet: (String) -> Unit = {},
+    onPinMatched: (matchedPin: String, matchedViaPlaintext: Boolean, matchedViaSimpleHash: Boolean) -> Unit = { _, _, _ -> }
 ) {
     var inputPin by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -48,7 +69,14 @@ fun PinLockDialog(
                     onPinSet(newPin)
                     onSuccess()
                 } else {
-                    if (newPin == correctPin) {
+                    val viaPlain = (newPin == correctPin) && correctPin.isNotEmpty() && correctPin.length != 64
+                    val viaHash = hashPin(newPin) == correctPin
+                    val viaSimple = !viaPlain && !viaHash && simpleHashPin(newPin) == correctPin
+                    val matches = viaPlain || viaHash || viaSimple
+                    if (matches) {
+                        if (viaPlain || viaSimple) {
+                            onPinMatched(newPin, viaPlain, viaSimple)
+                        }
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onSuccess()
                     } else {
@@ -134,7 +162,7 @@ fun PinLockDialog(
                 }
 
                 errorMessage?.let { msg ->
-                    Text(msg, color = Coral, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(msg, color = Coral, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
                 Spacer(Modifier.height(4.dp))
@@ -182,8 +210,7 @@ fun PinLockDialog(
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(
                                                     item.faDigits(),
-                                                    fontSize = 24.sp,
-                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                             }
@@ -197,7 +224,7 @@ fun PinLockDialog(
 
                 if (isSettingMode) {
                     TextButton(onClick = onDismiss) {
-                        Text("انصراف", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("انصراف", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

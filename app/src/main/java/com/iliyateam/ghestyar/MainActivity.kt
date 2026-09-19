@@ -14,16 +14,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,6 +41,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.iliyateam.ghestyar.data.Installment
+import com.iliyateam.ghestyar.data.Premium
 import com.iliyateam.ghestyar.ui.components.PinLockDialog
 import com.iliyateam.ghestyar.ui.components.bounceClick
 import com.iliyateam.ghestyar.ui.components.tabTransitionSpec
@@ -206,7 +210,7 @@ class MainActivity : ComponentActivity() {
         var showPremium by remember { mutableStateOf(false) }
         var showLoanCalculator by remember { mutableStateOf(false) }
         var showExportReports by rememberSaveable { mutableStateOf(false) }
-        var isPremium by remember { mutableStateOf(Premium.isPremium(context)) }
+        val isPremium by vm.isPremium.collectAsStateWithLifecycle()
         var overviewSubTab by rememberSaveable { mutableIntStateOf(0) }
 
         val activeInstallments by vm.active.collectAsStateWithLifecycle()
@@ -261,6 +265,11 @@ class MainActivity : ComponentActivity() {
         if (isPinLockEnabled && !isUnlocked) {
             PinLockDialog(
                 correctPin = pinCode,
+                onPinMatched = { matched, viaPlain, viaSimple ->
+                    if (viaPlain || viaSimple) {
+                        vm.setPinLock(true, matched)
+                    }
+                },
                 onSuccess = { isUnlocked = true }
             )
             return
@@ -344,51 +353,72 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         bottomBar = {
-                            NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                tonalElevation = 3.dp,
-                                modifier = Modifier.navigationBarsPadding()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
-                                MainNavTab.entries.forEach { tab ->
-                                    val isSelected = mainPagerState.currentPage == tab.ordinal
-                                    val iconScale by animateFloatAsState(
-                                        targetValue = if (isSelected) 1.18f else 1.0f,
-                                        animationSpec = spring(
-                                            dampingRatio = 0.6f,
-                                            stiffness = 500f
-                                        ),
-                                        label = "nav_icon_scale"
-                                    )
-                                    NavigationBarItem(
-                                        selected = isSelected,
-                                        onClick = { switchToTab(tab.ordinal) },
-                                        icon = {
-                                            Icon(
-                                                tab.icon,
-                                                contentDescription = tab.title,
-                                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.graphicsLayer {
-                                                    scaleX = iconScale
-                                                    scaleY = iconScale
+                                Surface(
+                                    shape = RoundedCornerShape(32.dp),
+                                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                    shadowElevation = 6.dp,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 6.dp, vertical = 6.dp),
+                                        horizontalArrangement = Arrangement.SpaceAround,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        MainNavTab.entries.forEach { tab ->
+                                            val isSelected = mainPagerState.currentPage == tab.ordinal
+                                            val iconScale by animateFloatAsState(
+                                                targetValue = if (isSelected) 1.15f else 1.0f,
+                                                animationSpec = spring(
+                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                    stiffness = Spring.StiffnessMedium
+                                                ),
+                                                label = "nav_icon_scale"
+                                            )
+
+                                            Surface(
+                                                onClick = { switchToTab(tab.ordinal) },
+                                                shape = RoundedCornerShape(24.dp),
+                                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .bounceClick(minScale = 0.94f)
+                                            ) {
+                                                Column(
+                                                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 2.dp),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Icon(
+                                                        tab.icon,
+                                                        contentDescription = tab.title,
+                                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        modifier = Modifier
+                                                            .size(22.dp)
+                                                            .graphicsLayer {
+                                                                scaleX = iconScale
+                                                                scaleY = iconScale
+                                                            }
+                                                    )
+                                                    Text(
+                                                        tab.title,
+                                                        fontSize = 11.sp,
+                                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        maxLines = 1
+                                                    )
                                                 }
-                                            )
-                                        },
-                                        label = {
-                                            Text(
-                                                tab.title,
-                                                fontSize = 10.sp,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        },
-                                        colors = NavigationBarItemDefaults.colors(
-                                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -524,8 +554,7 @@ class MainActivity : ComponentActivity() {
                 isCurrentlyPremium = isPremium,
                 onDismiss = { showPremium = false },
                 onUnlock = { selectedTier ->
-                    Premium.setPremium(context, true, selectedTier)
-                    isPremium = true
+                    vm.unlockPremium(selectedTier)
                     showPremium = false
                     Toast.makeText(
                         context,
@@ -535,7 +564,7 @@ class MainActivity : ComponentActivity() {
                 },
                 onResetFree = {
                     Premium.setPremium(context, false)
-                    isPremium = false
+                    vm.refreshPremium()
                     showPremium = false
                     Toast.makeText(context, "حالت به نسخه رایگان تغییر یافت", Toast.LENGTH_SHORT).show()
                 }

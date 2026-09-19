@@ -31,8 +31,7 @@ fun ConfirmDeleteDialog(
         text = {
             Text(
                 message,
-                fontSize = 12.sp,
-                lineHeight = 18.sp,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
